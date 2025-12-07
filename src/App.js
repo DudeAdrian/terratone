@@ -1,25 +1,47 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import Home from "./pages/Home";
+import AdminDashboard from "./pages/AdminDashboard";
+import MainLayout from "./components/MainLayout";
+import Services from "./pages/Services";
+import Energy from "./pages/services/Energy";
+import Community from "./pages/services/Community";
+import SystemShell from "./components/SystemShell";
+
+// Block extensions trying to redefine ethereum
+if (window.ethereum && Object.getOwnPropertyDescriptor(window, 'ethereum')?.configurable === false) {
+  console.warn("Extension attempted to redefine window.ethereum — skipping.");
 }
+
+const App = () => {
+  return (
+    <Router>
+      <SystemShell>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route
+            path="/admin"
+            element={
+              <MainLayout>
+                <AdminDashboard />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/services"
+            element={
+              <MainLayout>
+                <Services />
+              </MainLayout>
+            }
+          />
+          <Route path="/services/energy" element={<Energy />} />
+          <Route path="/services/community" element={<Community />} />
+        </Routes>
+      </SystemShell>
+    </Router>
+  );
+};
 
 export default App;
