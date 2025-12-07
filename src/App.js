@@ -7,6 +7,7 @@ import MainLayout from "./components/MainLayout";
 import Services from "./pages/Services";
 import Energy from "./pages/services/Energy";
 import Community from "./pages/services/Community";
+import SelfSufficiency from "./pages/SelfSufficiency";
 import SystemShell from "./components/SystemShell";
 
 // Block extensions trying to redefine ethereum
@@ -38,6 +39,7 @@ const App = () => {
           />
           <Route path="/services/energy" element={<Energy />} />
           <Route path="/services/community" element={<Community />} />
+          <Route path="/sustainability" element={<SelfSufficiency />} />
         </Routes>
       </SystemShell>
     </Router>

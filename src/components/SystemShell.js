@@ -17,11 +17,12 @@ const SystemShell = ({ children }) => {
       </header>
 
       {/* 🔗 NAVIGATION BAR */}
-      <nav className="bg-blue-600 text-white p-3 flex justify-center space-x-6 font-medium">
+      <nav className="bg-blue-600 text-white p-3 flex justify-center space-x-6 font-medium flex-wrap">
         <Link to="/">Home</Link>
         <Link to="/services">Services</Link>
         <Link to="/services/energy">Energy</Link>
         <Link to="/services/community">Community</Link>
+        <Link to="/sustainability">🌍 Sustainability</Link>
         <Link to="/admin">Admin</Link>
       </nav>
 
