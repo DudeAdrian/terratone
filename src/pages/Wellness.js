@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import sofieCore from "../core/SofieCore";
+import { GlassSection, GlassCard, GlassGrid } from "../theme/GlassmorphismTheme";
 
 const Wellness = () => {
   const [programs, setPrograms] = useState([]);
   const [events, setEvents] = useState([]);
   const [resources, setResources] = useState([]);
   const [stats, setStats] = useState({});
+  const [activeTab, setActiveTab] = useState("programs");
 
   useEffect(() => {
     const wellnessService = sofieCore.getService("wellness");
@@ -18,88 +20,218 @@ const Wellness = () => {
   }, []);
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-5xl font-bold text-green-800 mb-2">🧘 Community Wellness</h1>
-        <p className="text-lg text-gray-600">Health, wellbeing, and community connection programs</p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-green-50 dark:from-gray-950 dark:via-gray-900 dark:to-emerald-950 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
 
-      <div className="grid md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-md p-6 border-l-4 border-blue-600">
-          <div className="text-sm font-semibold text-blue-600 uppercase">Active Programs</div>
-          <div className="text-3xl font-bold text-gray-800 mt-2">{stats.activePrograms || 0}</div>
-        </div>
-        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg shadow-md p-6 border-l-4 border-green-600">
-          <div className="text-sm font-semibold text-green-600 uppercase">Participants</div>
-          <div className="text-3xl font-bold text-gray-800 mt-2">{stats.totalParticipants || 0}</div>
-        </div>
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg shadow-md p-6 border-l-4 border-purple-600">
-          <div className="text-sm font-semibold text-purple-600 uppercase">Events</div>
-          <div className="text-3xl font-bold text-gray-800 mt-2">{stats.upcomingEvents || 0}</div>
-        </div>
-        <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg shadow-md p-6 border-l-4 border-orange-600">
-          <div className="text-sm font-semibold text-orange-600 uppercase">Wellness Score</div>
-          <div className="text-3xl font-bold text-gray-800 mt-2">{stats.wellnessScore || 0}%</div>
-        </div>
-      </div>
-
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
-        {programs.map((program) => (
-          <div key={program.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-            <div className="text-4xl mb-3">
-              {program.type === "physical" && "🏃"}
-              {program.type === "mental" && "🧠"}
-              {program.type === "educational" && "📖"}
+        {/* Header */}
+        <GlassSection colors={{ primary: "emerald", secondary: "green" }} elevation="high">
+          <div className="py-12 px-8">
+            <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
+              🧘 Community Wellness
+            </h1>
+            <p className="text-lg text-emerald-700 dark:text-emerald-200 max-w-2xl">
+              Health, wellbeing, and community connection programs with verified wellness metrics
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <span className="px-4 py-2 bg-emerald-100/50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 rounded-full text-sm font-medium backdrop-blur-sm">
+                💪 Active Programs
+              </span>
+              <span className="px-4 py-2 bg-green-100/50 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-full text-sm font-medium backdrop-blur-sm">
+                👥 Community Events
+              </span>
+              <span className="px-4 py-2 bg-teal-100/50 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 rounded-full text-sm font-medium backdrop-blur-sm">
+                📊 Wellness Tracking
+              </span>
             </div>
-            <h3 className="text-lg font-bold text-gray-800 mb-2">{program.name}</h3>
-            <p className="text-sm text-gray-600 mb-3">{program.description}</p>
-            <div className="text-sm text-gray-700 space-y-1">
-              <p><strong>Frequency:</strong> {program.frequency}</p>
-              <p><strong>Participants:</strong> {program.participants}</p>
-            </div>
-            <button className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">
-              Join Program
-            </button>
           </div>
-        ))}
-      </div>
+        </GlassSection>
 
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">📅 Upcoming Community Events</h2>
-      <div className="grid md:grid-cols-2 gap-6 mb-12">
-        {events.map((event) => (
-          <div key={event.id} className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg shadow-md p-6 border-l-4 border-purple-600">
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="text-lg font-bold text-gray-800">{event.name}</h3>
-              <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full capitalize">{event.type}</span>
+        {/* Key Stats */}
+        <GlassGrid cols={2} colsMd={4} gap={5}>
+          <GlassCard colors={{ primary: "emerald", secondary: "green" }}>
+            <div className="p-8 text-center min-h-[160px] flex flex-col justify-center">
+              <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">Active Programs</div>
+              <div className="text-5xl font-bold text-emerald-600 dark:text-emerald-400">{stats.activePrograms || 0}</div>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-3">Running now</p>
             </div>
-            <p className="text-gray-600 mb-4">📅 {event.date}</p>
-            <p className="text-sm text-gray-600 mb-4">👥 {event.participants} registered</p>
-            <button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition">
-              Register
-            </button>
-          </div>
-        ))}
-      </div>
+          </GlassCard>
 
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">💚 Wellness Resources</h2>
-      <div className="grid md:grid-cols-3 gap-6">
-        {resources.map((resource) => (
-          <div key={resource.id} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
-            <h3 className="text-lg font-bold text-gray-800 mb-2">{resource.name}</h3>
-            <p className="text-sm text-gray-600 mb-3 capitalize">{resource.type}</p>
-            <div className="flex items-center">
-              {resource.available ? (
-                <span className="inline-block bg-green-500 text-white text-xs px-3 py-1 rounded-full font-bold">
-                  ✓ Available
-                </span>
-              ) : (
-                <span className="inline-block bg-gray-400 text-white text-xs px-3 py-1 rounded-full font-bold">
-                  Not Available
-                </span>
+          <GlassCard colors={{ primary: "green", secondary: "emerald" }}>
+            <div className="p-8 text-center min-h-[160px] flex flex-col justify-center">
+              <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">Participants</div>
+              <div className="text-5xl font-bold text-green-600 dark:text-green-400">{stats.totalParticipants || 0}</div>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-3">Community members</p>
+            </div>
+          </GlassCard>
+
+          <GlassCard colors={{ primary: "blue", secondary: "cyan" }}>
+            <div className="p-8 text-center min-h-[160px] flex flex-col justify-center">
+              <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">Upcoming Events</div>
+              <div className="text-5xl font-bold text-blue-600 dark:text-blue-400">{stats.upcomingEvents || 0}</div>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-3">Next month</p>
+            </div>
+          </GlassCard>
+
+          <GlassCard colors={{ primary: "violet", secondary: "purple" }}>
+            <div className="p-8 text-center min-h-[160px] flex flex-col justify-center">
+              <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">Wellness Score</div>
+              <div className="text-5xl font-bold text-violet-600 dark:text-violet-400">{stats.wellnessScore || 0}%</div>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-3">Community avg</p>
+            </div>
+          </GlassCard>
+        </GlassGrid>
+
+        {/* Tabs */}
+        <GlassSection colors={{ primary: "emerald", secondary: "green" }}>
+          <div className="flex flex-wrap border-b border-emerald-300/30 dark:border-emerald-700/30 backdrop-blur-sm">
+            {["programs", "events", "resources"].map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-8 py-4 font-medium capitalize text-lg transition-all duration-200 ${
+                  activeTab === tab
+                    ? "bg-gradient-to-b from-emerald-400/40 to-emerald-300/20 dark:from-emerald-600/50 dark:to-emerald-700/30 text-emerald-700 dark:text-emerald-300 border-b-2 border-emerald-600 dark:border-emerald-400"
+                    : "text-gray-700 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-300 hover:bg-emerald-200/10 dark:hover:bg-emerald-700/10"
+                }`}
+              >
+                {tab === "programs" && "💪"}
+                {tab === "events" && "📅"}
+                {tab === "resources" && "📚"}
+                <span className="ml-2">{tab}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Programs Tab */}
+          {activeTab === "programs" && (
+            <div className="p-8">
+              <div className="grid md:grid-cols-3 gap-6">
+                {programs.slice(0, 6).map((program) => (
+                  <GlassCard key={program.id} colors={{ primary: "emerald", secondary: "green" }}>
+                    <div className="p-6 min-h-[240px] flex flex-col">
+                      <div className="text-5xl mb-4">
+                        {program.type === "physical" && "🏃"}
+                        {program.type === "mental" && "🧠"}
+                        {program.type === "educational" && "📖"}
+                        {program.type === "social" && "🤝"}
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{program.name}</h3>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 mb-4 flex-1">{program.description}</p>
+                      <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        <p>📍 {program.frequency}</p>
+                        <p>👥 {program.participants} members</p>
+                      </div>
+                      <button className="w-full bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 backdrop-blur-sm">
+                        Join Now
+                      </button>
+                    </div>
+                  </GlassCard>
+                ))}
+              </div>
+              {programs.length === 0 && (
+                <div className="text-center py-12 text-gray-600 dark:text-gray-400">
+                  No wellness programs available yet
+                </div>
               )}
             </div>
+          )}
+
+          {/* Events Tab */}
+          {activeTab === "events" && (
+            <div className="p-8 space-y-5">
+              {events.slice(0, 5).map((event) => (
+                <GlassCard key={event.id} colors={{ primary: "emerald", secondary: "green" }}>
+                  <div className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">{event.name}</h3>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
+                          📅 {event.date}
+                        </p>
+                      </div>
+                      <span className="px-3 py-1 bg-emerald-100/50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 rounded-full text-xs font-bold capitalize">
+                        {event.type}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                      👥 {event.participants} registered
+                    </p>
+                    <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200">
+                      Register
+                    </button>
+                  </div>
+                </GlassCard>
+              ))}
+              {events.length === 0 && (
+                <div className="text-center py-12 text-gray-600 dark:text-gray-400">
+                  No upcoming events scheduled
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Resources Tab */}
+          {activeTab === "resources" && (
+            <div className="p-8">
+              <div className="grid md:grid-cols-2 gap-6">
+                {resources.slice(0, 6).map((resource) => (
+                  <GlassCard key={resource.id} colors={{ primary: "green", secondary: "emerald" }}>
+                    <div className="p-6">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{resource.name}</h3>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 mb-4 capitalize">{resource.type}</p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{resource.description || "Wellness resource"}</p>
+                        {resource.available ? (
+                          <span className="px-3 py-1 bg-emerald-100/50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 rounded-full text-xs font-bold">
+                            ✓ Available
+                          </span>
+                        ) : (
+                          <span className="px-3 py-1 bg-gray-200/50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 rounded-full text-xs font-bold">
+                            Coming Soon
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </GlassCard>
+                ))}
+              </div>
+              {resources.length === 0 && (
+                <div className="text-center py-12 text-gray-600 dark:text-gray-400">
+                  No wellness resources available
+                </div>
+              )}
+            </div>
+          )}
+        </GlassSection>
+
+        {/* Wellness Tips */}
+        <GlassCard colors={{ primary: "emerald", secondary: "green" }}>
+          <div className="p-8">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-3">
+              <span>💡</span>
+              <span>Daily Wellness Tips</span>
+            </h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              {[
+                { emoji: "🥗", title: "Nutrition", tip: "Eat whole foods grown locally when possible" },
+                { emoji: "💧", title: "Hydration", tip: "Drink at least 8 glasses of water daily" },
+                { emoji: "🚶", title: "Movement", tip: "Take a 30-minute walk or stretch every day" },
+                { emoji: "😴", title: "Sleep", tip: "Aim for consistent 7-8 hours per night" },
+                { emoji: "🧘", title: "Mindfulness", tip: "Practice 10 minutes of meditation or yoga" },
+                { emoji: "🤝", title: "Connection", tip: "Spend time with community members daily" }
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-start gap-4 p-4 bg-emerald-100/20 dark:bg-emerald-900/20 rounded-lg border-l-4 border-emerald-500">
+                  <span className="text-3xl flex-shrink-0">{item.emoji}</span>
+                  <div>
+                    <h3 className="font-bold text-gray-900 dark:text-white">{item.title}</h3>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">{item.tip}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
+        </GlassCard>
+
       </div>
     </div>
   );
