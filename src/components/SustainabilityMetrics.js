@@ -1,26 +1,11 @@
 // src/components/SustainabilityMetrics.js
 import React, { useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import LoadingSpinner from "./LoadingSpinner";
 import sofieCore from "../core/SofieCore";
 
-const SustainabilityMetrics = () => {
-  const [metrics, setMetrics] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const sustainability = sofieCore.getService("sustainability");
-    if (sustainability) {
-      const data = sustainability.getDashboardMetrics();
-      setMetrics(data);
-      setLoading(false);
-    }
-  }, []);
-
-  if (loading) return <div className="text-center py-8">Loading metrics...</div>;
-  if (!metrics) return <div className="text-center py-8">No data available</div>;
-
-  const { systemHealth, recommendations } = metrics;
-
-  const ScoreCard = ({ title, score, icon }) => (
+const ScoreCard = ({ title, score, icon }) => {
+  return (
     <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-lg shadow-md p-6 flex items-center justify-between border-l-4 border-green-500">
       <div>
         <h3 className="text-lg font-semibold text-gray-700">{title}</h3>
@@ -29,21 +14,61 @@ const SustainabilityMetrics = () => {
       <div className="text-4xl">{icon}</div>
     </div>
   );
+};
 
-  const ProgressBar = ({ label, value, color = "green" }) => (
-    <div className="mb-4">
-      <div className="flex justify-between mb-2">
-        <span className="text-sm font-medium text-gray-700">{label}</span>
-        <span className="text-sm font-bold text-gray-600">{value}%</span>
-      </div>
-      <div className="w-full bg-gray-200 rounded-full h-3">
-        <div
-          className={`bg-${color}-500 h-3 rounded-full transition-all`}
-          style={{ width: `${value}%` }}
-        ></div>
-      </div>
+ScoreCard.propTypes = {
+  title: PropTypes.string.isRequired,
+  score: PropTypes.number.isRequired,
+  icon: PropTypes.string.isRequired,
+};
+
+const ProgressBar = ({ label, value, color = "green" }) => (
+  <div className="mb-4">
+    <div className="flex justify-between mb-2">
+      <span className="text-sm font-medium text-gray-700">{label}</span>\n      <span className="text-sm font-bold text-gray-600">{value}%</span>
     </div>
-  );
+    <div className="w-full bg-gray-200 rounded-full h-3">
+      <div
+        className={`bg-${color}-500 h-3 rounded-full transition-all`}
+        style={{ width: `${value}%` }}
+      ></div>
+    </div>
+  </div>
+);
+
+ProgressBar.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.number.isRequired,
+  color: PropTypes.string,
+};
+
+const SustainabilityMetrics = () => {
+  const [metrics, setMetrics] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    try {
+      const sustainability = sofieCore.getService("sustainability");
+      if (sustainability) {
+        const data = sustainability.getDashboardMetrics();
+        setMetrics(data);
+      } else {
+        setError("Sustainability service not found");
+      }
+    } catch (err) {
+      setError(err.message || "Failed to load metrics");
+      sofieCore.getService("logger").error("Failed to load sustainability metrics", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  if (loading) return <LoadingSpinner text="Loading sustainability metrics..." />;
+  if (error) return <div className="text-center py-8 text-red-600">Error: {error}</div>;
+  if (!metrics) return <div className="text-center py-8 text-gray-600">No data available</div>;
+
+  const { systemHealth, recommendations } = metrics;
 
   return (
     <div className="space-y-6">
@@ -75,9 +100,7 @@ const SustainabilityMetrics = () => {
       <div className="grid md:grid-cols-3 gap-6">
         {/* Food System */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-            🌱 Food Systems
-          </h3>
+          <h3 className="text-xl font-bold text-gray-800 mb-4">🌱 Food Systems</h3>
           <div className="space-y-3">
             <ProgressBar label="Crop Diversity" value={Math.min(systemHealth.food.data.crops.length * 15, 100)} color="green" />
             <ProgressBar label="Storage Level" value={Math.min((systemHealth.food.data.storage / 500) * 100, 100)} color="yellow" />
@@ -92,9 +115,7 @@ const SustainabilityMetrics = () => {
 
         {/* Water System */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-            💧 Water Systems
-          </h3>
+          <h3 className="text-xl font-bold text-gray-800 mb-4">💧 Water Systems</h3>
           <div className="space-y-3">
             <ProgressBar label="Reserve Level" value={Math.min((systemHealth.water.data.totalReserve / 5000) * 100, 100)} color="blue" />
             <ProgressBar label="Conservation Efficiency" value={Math.max(100 - (systemHealth.water.data.dailyUsage / 10), 0)} color="cyan" />
@@ -109,9 +130,7 @@ const SustainabilityMetrics = () => {
 
         {/* Housing System */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-            🏠 Housing & Environment
-          </h3>
+          <h3 className="text-xl font-bold text-gray-800 mb-4">🏠 Housing & Environment</h3>
           <div className="space-y-3">
             <ProgressBar label="Thermal Efficiency" value={systemHealth.housing.data.thermalEfficiency} color="orange" />
             <ProgressBar label="Air Quality" value={systemHealth.housing.data.airQuality} color="green" />

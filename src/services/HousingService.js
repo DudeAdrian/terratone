@@ -21,8 +21,14 @@ class HousingService {
   }
 
   initialize() {
-    this.status = "initialized";
-    sofieCore.getService("logger").log("[HousingService] Housing & shelter module initialized.");
+    try {
+      this.status = "initialized";
+      sofieCore.getService("logger").log("[HousingService] Housing & shelter module initialized.");
+    } catch (error) {
+      this.status = "error";
+      sofieCore.getService("logger").error("[HousingService] Initialization failed", error);
+      throw error;
+    }
   }
 
   addStructure(structureData) {
@@ -87,6 +93,16 @@ class HousingService {
 
   getHousingData() {
     return this.housingData;
+  }
+
+  /**
+   * Get equipment runtime in hours (for AutopilotService)
+   */
+  getEquipmentRuntime() {
+    // Simulate total runtime of HVAC, pumps, etc.
+    const baseRuntime = 2000; // hours
+    const additionalRuntime = Math.random() * 1000; // 0-1000 hours
+    return Math.round(baseRuntime + additionalRuntime);
   }
 }
 

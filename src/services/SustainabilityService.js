@@ -14,7 +14,12 @@ class SustainabilityService {
   }
 
   initialize() {
-    sofieCore.getService("logger").log("[SustainabilityService] Sustainability aggregator initialized.");
+    try {
+      sofieCore.getService("logger").log("[SustainabilityService] Sustainability aggregator initialized.");
+    } catch (error) {
+      sofieCore.getService("logger").error("[SustainabilityService] Initialization failed", error);
+      throw error;
+    }
   }
 
   calculateOverallScore() {

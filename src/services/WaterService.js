@@ -16,8 +16,14 @@ class WaterService {
   }
 
   initialize() {
-    this.status = "initialized";
-    sofieCore.getService("logger").log("[WaterService] Water conservation module initialized.");
+    try {
+      this.status = "initialized";
+      sofieCore.getService("logger").log("[WaterService] Water conservation module initialized.");
+    } catch (error) {
+      this.status = "error";
+      sofieCore.getService("logger").error("[WaterService] Initialization failed", error);
+      throw error;
+    }
   }
 
   addWaterSystem(systemData) {
