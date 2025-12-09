@@ -34,10 +34,13 @@ export const QuantumParams = {
     medium: 'backdrop-blur-xl',        // 20px - Observable reality
     light: 'backdrop-blur-lg',         // 12px - Surface level
     minimal: 'backdrop-blur-md',       // 8px - Initial observation
+    stack: 'backdrop-blur-3xl',        // Stacked blur for enhanced depth
   },
 
-  // Transparency Spectrum - Wave function collapse
+  // Transparency Spectrum - Wave function collapse (ENHANCED: Ultra-clear)
   opacity: {
+    crystal: 'bg-white/2 dark:bg-black/2',      // 2% - Crystal clear
+    ultraClear: 'bg-white/3 dark:bg-black/3',   // 3% - Ultra transparent
     quantum: 'bg-white/5 dark:bg-black/5',      // 5% - Pure superposition
     ethereal: 'bg-white/8 dark:bg-black/8',     // 8% - Near-transparent
     veil: 'bg-white/12 dark:bg-black/12',       // 12% - Semi-transparent
@@ -48,7 +51,7 @@ export const QuantumParams = {
     dense: 'bg-white/40 dark:bg-black/40',      // 40% - Dense glass
   },
 
-  // Border Transparency - Quantum boundary states
+  // Border Transparency - Quantum boundary states (ENHANCED: Color-hued edges)
   border: {
     quantum: 'border-white/5 dark:border-white/3',
     ethereal: 'border-white/10 dark:border-white/5',
@@ -58,13 +61,26 @@ export const QuantumParams = {
     clear: 'border-white/40 dark:border-white/30',
   },
 
-  // Chakra Colors - Energy center alignment
+  // Edge Halos - Color-shifted borders with quantum glow
+  edgeHalo: {
+    root: 'shadow-[0_0_20px_rgba(220,38,38,0.4),0_0_40px_rgba(220,38,38,0.2),inset_0_0_20px_rgba(220,38,38,0.1)]',
+    sacral: 'shadow-[0_0_20px_rgba(234,88,12,0.4),0_0_40px_rgba(234,88,12,0.2),inset_0_0_20px_rgba(234,88,12,0.1)]',
+    solar: 'shadow-[0_0_20px_rgba(250,204,21,0.4),0_0_40px_rgba(250,204,21,0.2),inset_0_0_20px_rgba(250,204,21,0.1)]',
+    heart: 'shadow-[0_0_20px_rgba(16,185,129,0.4),0_0_40px_rgba(16,185,129,0.2),inset_0_0_20px_rgba(16,185,129,0.1)]',
+    throat: 'shadow-[0_0_20px_rgba(14,165,233,0.4),0_0_40px_rgba(14,165,233,0.2),inset_0_0_20px_rgba(14,165,233,0.1)]',
+    third_eye: 'shadow-[0_0_20px_rgba(139,92,246,0.4),0_0_40px_rgba(139,92,246,0.2),inset_0_0_20px_rgba(139,92,246,0.1)]',
+    crown: 'shadow-[0_0_20px_rgba(236,72,153,0.4),0_0_40px_rgba(236,72,153,0.2),inset_0_0_20px_rgba(236,72,153,0.1)]',
+  },
+
+  // Chakra Colors - Energy center alignment (ENHANCED: Gradient edges)
   chakra: {
     root: {
       bg: 'bg-red-600/20',
       text: 'text-red-700 dark:text-red-300',
       border: 'border-red-600/40',
       glow: 'from-red-600/30 to-red-400/10',
+      edgeBorder: 'border-transparent',
+      edgeGradient: 'to-red-600/60 from-red-600/20',
       hex: '#DC2626',
     },
     sacral: {
@@ -72,6 +88,8 @@ export const QuantumParams = {
       text: 'text-orange-700 dark:text-orange-300',
       border: 'border-orange-600/40',
       glow: 'from-orange-600/30 to-orange-400/10',
+      edgeBorder: 'border-transparent',
+      edgeGradient: 'to-orange-600/60 from-orange-600/20',
       hex: '#EA580C',
     },
     solar: {
@@ -79,6 +97,8 @@ export const QuantumParams = {
       text: 'text-yellow-700 dark:text-yellow-300',
       border: 'border-yellow-600/40',
       glow: 'from-yellow-600/30 to-yellow-400/10',
+      edgeBorder: 'border-transparent',
+      edgeGradient: 'to-yellow-600/60 from-yellow-600/20',
       hex: '#FACC15',
     },
     heart: {
@@ -86,6 +106,8 @@ export const QuantumParams = {
       text: 'text-emerald-700 dark:text-emerald-300',
       border: 'border-emerald-600/40',
       glow: 'from-emerald-600/30 to-emerald-400/10',
+      edgeBorder: 'border-transparent',
+      edgeGradient: 'to-emerald-600/60 from-emerald-600/20',
       hex: '#10B981',
     },
     throat: {
@@ -93,6 +115,8 @@ export const QuantumParams = {
       text: 'text-sky-700 dark:text-sky-300',
       border: 'border-sky-600/40',
       glow: 'from-sky-600/30 to-sky-400/10',
+      edgeBorder: 'border-transparent',
+      edgeGradient: 'to-sky-600/60 from-sky-600/20',
       hex: '#0EA5E9',
     },
     third_eye: {
@@ -100,6 +124,8 @@ export const QuantumParams = {
       text: 'text-purple-700 dark:text-purple-300',
       border: 'border-purple-600/40',
       glow: 'from-purple-600/30 to-purple-400/10',
+      edgeBorder: 'border-transparent',
+      edgeGradient: 'to-purple-600/60 from-purple-600/20',
       hex: '#8B5CF6',
     },
     crown: {
@@ -107,6 +133,8 @@ export const QuantumParams = {
       text: 'text-pink-700 dark:text-pink-300',
       border: 'border-pink-600/40',
       glow: 'from-pink-600/30 to-pink-400/10',
+      edgeBorder: 'border-transparent',
+      edgeGradient: 'to-pink-600/60 from-pink-600/20',
       hex: '#EC4899',
     },
   },
@@ -129,16 +157,17 @@ export const QuantumParams = {
 };
 
 // ============================================================================
-// QUANTUM CARD - Deep Transparency with Chakra Alignment
+// QUANTUM CARD - Ultra-Transparent with Color-Hued Edges
 // ============================================================================
 
 export const QuantumCard = ({
   children,
   chakra = 'heart',
   blurLevel = 'medium',
-  opacityLevel = 'cloud',
+  opacityLevel = 'ultraClear',
   glow = true,
   interactive = true,
+  edgeGlow = true,
   role = 'article',
   ariaLabel,
   className = '',
@@ -150,6 +179,7 @@ export const QuantumCard = ({
   const borderClass = QuantumParams.border[blurLevel === 'quantum' ? 'quantum' : 'mist'];
   const shadowClass = QuantumParams.shadow[blurLevel === 'quantum' ? 'quantum' : 'deep'];
   const transitionClass = QuantumParams.transition.quantum;
+  const edgeHaloClass = QuantumParams.edgeHalo[chakra] || QuantumParams.edgeHalo.heart;
 
   return (
     <div
@@ -165,6 +195,7 @@ export const QuantumCard = ({
         ${chakraConfig.border}
         p-5
         ${shadowClass}
+        ${edgeGlow ? edgeHaloClass : ''}
         ${interactive ? 'cursor-pointer hover:shadow-2xl dark:hover:shadow-2xl/60' : ''}
         ${interactive ? 'hover:' + opacityClass.replace('bg-white/', 'bg-white/') : ''}
         ${transitionClass}
@@ -176,6 +207,25 @@ export const QuantumCard = ({
       aria-label={ariaLabel}
       {...props}
     >
+      {/* Edge Gradient Overlay - Color-hued border effect */}
+      {edgeGlow && (
+        <div className={`
+          absolute
+          inset-0
+          rounded-2xl
+          border
+          border-2
+          ${chakraConfig.edgeBorder}
+          opacity-0
+          group-hover:opacity-100
+          ${transitionClass}
+          pointer-events-none
+          bg-gradient-to-br
+          ${chakraConfig.edgeGradient}
+          -z-10
+        `} />
+      )}
+
       <div className="relative z-10">
         {children}
       </div>
@@ -189,7 +239,7 @@ export const QuantumCard = ({
           bg-gradient-to-br
           ${chakraConfig.glow}
           opacity-0
-          group-hover:opacity-30
+          group-hover:opacity-40
           ${transitionClass}
           pointer-events-none
           -z-10
@@ -200,7 +250,7 @@ export const QuantumCard = ({
 };
 
 // ============================================================================
-// QUANTUM GLASS PANEL - Multi-Layer Quantum Superposition
+// QUANTUM GLASS PANEL - Ultra-Clear with Color-Shifted Edges
 // ============================================================================
 
 export const QuantumGlassPanel = ({
@@ -208,24 +258,28 @@ export const QuantumGlassPanel = ({
   chakra = 'throat',
   depth = 'deep',
   className = '',
+  edgeGlow = true,
   ...props
 }) => {
   const chakraConfig = QuantumParams.chakra[chakra];
+  const edgeHaloClass = QuantumParams.edgeHalo[chakra] || QuantumParams.edgeHalo.throat;
   const depthConfig = {
-    quantum: { blur: 'quantum', opacity: 'quantum', border: 'quantum' },
-    deep: { blur: 'deep', opacity: 'veil', border: 'ethereal' },
-    medium: { blur: 'medium', opacity: 'mist', border: 'veil' },
-    light: { blur: 'light', opacity: 'fog', border: 'mist' },
+    quantum: { blur: 'quantum', opacity: 'ultraClear', border: 'quantum' },
+    deep: { blur: 'deep', opacity: 'crystal', border: 'ethereal' },
+    medium: { blur: 'medium', opacity: 'ultraClear', border: 'veil' },
+    light: { blur: 'light', opacity: 'quantum', border: 'mist' },
   }[depth];
 
   return (
     <div className={`
       relative
+      group
       overflow-hidden
       rounded-3xl
+      ${edgeGlow ? edgeHaloClass : ''}
       ${className}
     `}>
-      {/* Layer 1: Quantum Base */}
+      {/* Layer 1: Quantum Base - Ultra-transparent */}
       <div className={`
         absolute
         inset-0
@@ -234,17 +288,33 @@ export const QuantumGlassPanel = ({
         ${chakraConfig.bg}
       `} />
 
-      {/* Layer 2: Quantum Entanglement */}
+      {/* Layer 2: Quantum Entanglement - Enhanced depth */}
       <div className={`
         absolute
         inset-0
-        backdrop-blur-xl
-        ${QuantumParams.opacity.ethereal}
+        backdrop-blur-3xl
+        ${QuantumParams.opacity.quantum}
         from-transparent to-white/5 dark:to-black/5
         bg-gradient-to-br
       `} />
 
-      {/* Layer 3: Border Quantum State */}
+      {/* Layer 3: Border Quantum State with Color Hue */}
+      <div className={`
+        absolute
+        inset-0
+        rounded-3xl
+        border-2
+        ${QuantumParams.border[depthConfig.border]}
+        ${chakraConfig.border}
+        pointer-events-none
+        opacity-0
+        group-hover:opacity-100
+        ${QuantumParams.transition.quantum}
+        bg-gradient-to-br
+        ${chakraConfig.edgeGradient}
+      `} />
+
+      {/* Standard Border */}
       <div className={`
         absolute
         inset-0
@@ -260,7 +330,7 @@ export const QuantumGlassPanel = ({
         {children}
       </div>
 
-      {/* Glow Effect Layer */}
+      {/* Enhanced Glow Effect Layer */}
       <div className={`
         absolute
         -inset-1
@@ -268,11 +338,10 @@ export const QuantumGlassPanel = ({
         bg-gradient-to-br
         ${chakraConfig.glow}
         opacity-10
-        group-hover:opacity-20
-        blur-xl
+        group-hover:opacity-30
+        blur-2xl
         -z-10
-        transition-opacity
-        duration-500
+        ${QuantumParams.transition.quantum}
       `} />
     </div>
   );
@@ -384,6 +453,7 @@ export const QuantumMetricCard = ({
   icon,
   chakra = 'solar',
   trend,
+  edgeGlow = true,
   className = '',
   ...props
 }) => {
@@ -393,7 +463,8 @@ export const QuantumMetricCard = ({
     <QuantumCard
       chakra={chakra}
       blurLevel="medium"
-      opacityLevel="cloud"
+      opacityLevel="ultraClear"
+      edgeGlow={edgeGlow}
       className={`
         flex
         flex-col
