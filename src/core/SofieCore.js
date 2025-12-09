@@ -34,6 +34,7 @@ import AutopilotService from "../services/AutopilotService";
 import IoTService from "../services/IoTService";
 import PredictiveAnalyticsService from "../services/PredictiveAnalyticsService";
 import ImpactTrackingService from "../services/ImpactTrackingService";
+import HerbalLibraryService from "../services/HerbalLibraryService";
 
 class SofieCore {
   constructor() {
@@ -198,6 +199,10 @@ class SofieCore {
     growingScheduleInstance.initialize();
     this.services["globalGrowingSchedule"] = growingScheduleInstance;
     LoggerService.log("Global Growing Schedule service registered and active.");
+
+    this.registerService("herbalLibrary", HerbalLibraryService);
+    HerbalLibraryService.initialize();
+    LoggerService.log("Herbal Library service registered and active.");
 
     this.registerService("harvestForecast", HarvestForecastService);
     const harvestForecastInstance = new HarvestForecastService();

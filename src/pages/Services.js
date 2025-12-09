@@ -14,6 +14,13 @@ const Services = () => {
       color: "blue",
     },
     {
+      title: "Herbal Library",
+      path: "/herbal-library",
+      description: "Indigenous herbal knowledge for resilience and shared wellness.",
+      icon: "🌿",
+      color: "green",
+    },
+    {
       title: "Energy Systems",
       path: "energy",
       description: "Manage solar, battery, and off-grid solutions.",

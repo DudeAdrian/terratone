@@ -36,6 +36,7 @@ import SetupWizard from "./pages/SetupWizard";
 import PluginMarketplace from "./pages/PluginMarketplace";
 import IoT from "./pages/IoT";
 import ImpactTracking from "./pages/ImpactTracking";
+import HerbalLibrary from "./pages/HerbalLibrary";
 import Predictions from "./pages/Predictions";
 import GlobalBenchmarks from "./pages/GlobalBenchmarks";
 import SystemShell from "./components/SystemShell";
@@ -86,6 +87,7 @@ const App = () => {
                 <Route path="/plugins" element={<PluginMarketplace />} />
                 <Route path="/iot" element={<IoT />} />
                 <Route path="/impact-tracking" element={<ImpactTracking />} />
+                <Route path="/herbal-library" element={<HerbalLibrary />} />
                 <Route path="/predictions" element={<Predictions />} />
               </Routes>
             </SystemShell>
