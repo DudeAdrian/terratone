@@ -50,6 +50,7 @@ import HerbalLibrary from "./pages/HerbalLibrary";
 import SeedBank from "./pages/SeedBank";
 import HarvestForecast from "./pages/HarvestForecast";
 import PestManagement from "./pages/PestManagement";
+import ApiIntegrationDemo from "./components/ApiIntegrationDemo";
 
 // Block extensions trying to redefine ethereum
 if (window.ethereum && Object.getOwnPropertyDescriptor(window, 'ethereum')?.configurable === false) {
@@ -80,6 +81,7 @@ const App = () => {
                 <Route path="/" element={<PanelCarousel />} />
                 <Route path="/panel" element={<PanelCarousel />} />
                 <Route path="/setup" element={<SetupWizard />} />
+                <Route path="/api-demo" element={<ApiIntegrationDemo />} />
                 <Route path="/dashboard" element={<SystemDashboard />} />
                 <Route path="/alerts" element={<AlertCenter />} />
                 <Route path="/settings" element={<Settings />} />

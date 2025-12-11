@@ -4,6 +4,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../../core/SofieCore";
 import { GlassSection, GlassCard, GlassGrid } from "../../theme/GlassmorphismTheme";
 import { createBackHandler } from "../../utils/navigation";
+import { useWaterData } from "../../hooks/useApi";
 
 export default function WaterRecycling() {
   const navigate = useNavigate();
@@ -13,27 +14,68 @@ export default function WaterRecycling() {
   const [systems, setSystems] = useState([]);
   const [dailyMetrics, setDailyMetrics] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Fetch from backend API
+  const waterData = useWaterData('default');
 
   useEffect(() => {
-    try {
-      const recyclingService = sofieCore.getService("waterRecycling");
-      if (recyclingService) {
-        recyclingService.initialize();
-        setSystems(recyclingService.systems || []);
-        setDailyMetrics(recyclingService.dailyMetrics || []);
+    const loadData = async () => {
+      try {
+        // Try to fetch from backend API first
+        if (waterData.recycling.data) {
+          // Transform API response to match component structure
+          const systemsData = Array.isArray(waterData.recycling.data) 
+            ? waterData.recycling.data 
+            : [waterData.recycling.data];
+          setSystems(systemsData);
+          setError(null);
+        } else if (!waterData.isLoading) {
+          // Fallback to local data if API fails
+          const recyclingService = sofieCore.getService("waterRecycling");
+          if (recyclingService) {
+            recyclingService.initialize();
+            setSystems(recyclingService.systems || []);
+            setDailyMetrics(recyclingService.dailyMetrics || []);
+          }
+        }
+        setLoading(waterData.isLoading);
+      } catch (err) {
+        console.error("Error loading water recycling data:", err);
+        setError(err.message);
+        setLoading(false);
       }
-      setLoading(false);
-    } catch (error) {
-      console.error("Error loading water recycling data:", error);
-      setLoading(false);
-    }
-  }, []);
+    };
+
+    loadData();
+  }, [waterData.recycling.data, waterData.isLoading]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
         <GlassCard colors={{ primary: "cyan", secondary: "blue" }}>
-          <div className="p-8 text-gray-700 dark:text-gray-300">Loading recycling data...</div>
+          <div className="p-8 text-gray-700 dark:text-gray-300">
+            <div className="animate-spin inline-block w-6 h-6 border-3 border-cyan-500 border-t-transparent rounded-full mr-3"></div>
+            Loading recycling data...
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center p-4">
+        <GlassCard colors={{ primary: "red", secondary: "orange" }}>
+          <div className="p-8">
+            <p className="text-red-600 dark:text-red-400 mb-4">Error: {error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition"
+            >
+              Retry
+            </button>
+          </div>
         </GlassCard>
       </div>
     );
