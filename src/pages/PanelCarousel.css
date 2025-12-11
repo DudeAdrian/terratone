@@ -181,31 +181,24 @@
   box-shadow: none;
   padding: 0;
   margin-left: -26px;
+  margin-top: -26px;
+  top: 50%;
 }
 
-/* Icons inherit ring rotation - positioned on ring edge */
-.ring-icon-1 {
-  top: -26px;
-}
-
-.ring-icon-2 {
-  top: -25px;
-}
-
-.ring-icon-3 {
-  top: -27.5px;
-}
-
-.ring-icon-4 {
-  top: -30px;
-}
-
-.ring-icon-5 {
-  top: -32.5px;
-}
-
+/* Icons positioned on ring edge - transforms handled inline */
+.ring-icon-1,
+.ring-icon-2,
+.ring-icon-3,
+.ring-icon-4,
+.ring-icon-5,
 .ring-icon-6 {
-  top: -35px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 52px;
+  height: 52px;
+  margin-left: -26px;
+  margin-top: -26px;
 }
 
 

@@ -3,11 +3,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../../core/SofieCore";
 import { GlassSection, GlassCard, GlassGrid } from "../../theme/GlassmorphismTheme";
+import { createBackHandler } from "../../utils/navigation";
 
 export default function EnergyForecast() {
   const navigate = useNavigate();
   const location = useLocation();
   const ringData = location.state || {};
+  const handleBack = createBackHandler(navigate, location);
   const [forecast, setForecast] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -62,7 +64,7 @@ export default function EnergyForecast() {
         <GlassSection colors={{ primary: "amber", secondary: "orange" }} elevation="high">
           <div className="py-12 px-8" style={{ position: 'relative' }}>
             <button
-              onClick={() => navigate("/", { state: { activeRing: ringData.activeRing } })}
+              onClick={handleBack}
               className="return-button"
               style={{
                 position: 'absolute',

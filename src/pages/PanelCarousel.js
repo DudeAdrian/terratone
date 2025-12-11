@@ -77,12 +77,12 @@ export default function PanelCarousel() {
   useEffect(() => {
     const interval = setInterval(() => {
       setRotations((prev) => [
-        (prev[0] + 0.1) % 360,  // Ring 1 (Water): CW - very slow
-        (prev[1] - 0.1) % 360,  // Ring 2 (Energy): CCW - very slow
-        (prev[2] + 0.1) % 360,  // Ring 3 (Climate): CW - very slow
-        (prev[3] - 0.1) % 360,  // Ring 4 (Food): CCW - very slow
-        (prev[4] + 0.1) % 360,  // Ring 5 (Seeds): CW - very slow
-        (prev[5] - 0.1) % 360,  // Ring 6 (System): CCW - very slow
+        (prev[0] + 0.15) % 360,  // Ring 1 (Water): CW - 0.15 speed
+        (prev[1] + 0.12) % 360,  // Ring 2 (Energy): CW - 0.12 speed
+        (prev[2] + 0.18) % 360,  // Ring 3 (Climate): CW - 0.18 speed
+        (prev[3] + 0.10) % 360,  // Ring 4 (Food): CW - 0.10 speed
+        (prev[4] + 0.16) % 360,  // Ring 5 (Seeds): CW - 0.16 speed
+        (prev[5] + 0.14) % 360,  // Ring 6 (System): CW - 0.14 speed
       ]);
     }, 50);
     return () => clearInterval(interval);
@@ -150,18 +150,26 @@ export default function PanelCarousel() {
         {RINGS.map((ring, idx) => {
           const ringNumber = idx + 1;
           const isActive = activeRing === idx;
+          
+          // Each icon orbits on its own ring at its own speed
+          const speeds = [0.25, -0.20, 0.30, -0.18, 0.28, -0.22];
+          const orbitAngle = (rotations[idx] * (speeds[idx] > 0 ? 1 : -1)) % 360;
+          
+          // Ring radii: each ring is 50px apart, starting from 225px (ring 1) to 350px (ring 6)
+          const ringRadii = [225, 250, 275, 300, 325, 350];
+          const radius = ringRadii[idx];
 
           return (
             <div
               key={ring.name}
               className={`orbital-ring ring-${ringNumber} ${isActive ? "active" : ""}`}
-              style={{ transform: `rotate(${rotations[idx]}deg)` }}
             >
               <button
                 className={`ring-icon-holder ring-icon-${ringNumber}`}
                 style={{ 
                   color: ring.color,
-                  zIndex: isActive ? 1000 : 50 + idx
+                  zIndex: isActive ? 1000 : 50 + idx,
+                  transform: `rotate(${orbitAngle}deg) translateY(-${radius}px) rotate(${-orbitAngle}deg)`
                 }}
                 onClick={(e) => {
                   e.stopPropagation();

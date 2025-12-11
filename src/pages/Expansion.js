@@ -5,11 +5,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../core/SofieCore";
 import { GlassSection, GlassCard, GlassGrid, GlassButton } from "../theme/GlassmorphismTheme";
+import { createBackHandler } from "../utils/navigation";
 
 const Expansion = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const ringData = location.state || {};
+  const handleBack = createBackHandler(navigate, location);
   const [housingService, setHousingService] = useState(null);
   const [waterService, setWaterService] = useState(null);
   const [solarService, setSolarService] = useState(null);
@@ -66,7 +68,7 @@ const Expansion = () => {
         <GlassSection colors={{ primary: "slate", secondary: "green" }} elevation="high">
           <div className="flex items-start justify-between" style={{ position: 'relative' }}>
             <button
-              onClick={() => navigate("/", { state: { activeRing: ringData.activeRing } })}
+              onClick={handleBack}
               className="return-button"
               style={{
                 position: 'absolute',

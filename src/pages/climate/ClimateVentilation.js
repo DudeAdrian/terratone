@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../../core/SofieCore";
-import { glassPanel } from "../../theme/glassTokens";
+import { GlassSection, GlassCard, GlassGrid } from "../../theme/GlassmorphismTheme";
+import { createBackHandler } from "../../utils/navigation";
 
 export default function ClimateVentilation() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const ringData = location.state || {};
+  const handleBack = createBackHandler(navigate, location);
   const [ventilation, setVentilation] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -22,16 +29,20 @@ export default function ClimateVentilation() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-gray-900 flex items-center justify-center">
-        <div style={glassPanel} className="text-white">Loading ventilation data...</div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
+        <GlassCard colors={{ primary: "emerald", secondary: "teal" }}>
+          <div className="p-8 text-gray-700 dark:text-gray-300">Loading ventilation data...</div>
+        </GlassCard>
       </div>
     );
   }
 
   if (!ventilation) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-gray-900 flex items-center justify-center">
-        <div style={glassPanel} className="text-white">No ventilation data available</div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
+        <GlassCard colors={{ primary: "emerald", secondary: "teal" }}>
+          <div className="p-8 text-gray-700 dark:text-gray-300">No ventilation data available</div>
+        </GlassCard>
       </div>
     );
   }
@@ -47,231 +58,204 @@ export default function ClimateVentilation() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-gray-900 p-6">
-      {/* Header */}
-      <div style={{ 
-        ...glassPanel, 
-        background: 'linear-gradient(135deg, #5dd0b122, rgba(210, 175, 135, 0.12))',
-        border: '1px solid #5dd0b166',
-        boxShadow: '0 10px 28px rgba(0, 0, 0, 0.28), 0 0 24px #5dd0b155, inset 0 0 16px rgba(255, 255, 255, 0.08)',
-        marginBottom: '24px'
-      }}>
-        <h1 className="text-3xl font-bold mb-2" style={{ color: '#5dd0b1' }}>
-          🌀 Ventilation Control System
-        </h1>
-        <p className="text-gray-300">Energy recovery ventilator and smart airflow management</p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <GlassSection colors={{ primary: "emerald", secondary: "teal" }} elevation="high">
+          <div className="py-12 px-8" style={{ position: 'relative' }}>
+            <button onClick={handleBack} style={{ color: '#059669', position: 'absolute', top: '12px', left: '50%', transform: 'translateX(-50%)' }}>
+              <FaArrowLeft size={12} /> {ringData.ringName || 'Back'}
+            </button>
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">🌬️ Ventilation System</h1>
+          </div>
+        </GlassSection>
 
-      {/* ERV Status */}
-      <div
-        className="mb-6"
-        style={{
-          ...glassPanel,
-          background: 'linear-gradient(135deg, #5dd0b118, rgba(210, 175, 135, 0.10))',
-          border: '1px solid #5dd0b155',
-        }}
-      >
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-2xl font-bold mb-2" style={{ color: '#5dd0b1' }}>
-              Energy Recovery Ventilator
-            </h2>
-            <p className="text-gray-400">Heat/cool recovery with fresh air exchange</p>
-          </div>
-          <span
-            className="px-4 py-2 rounded-full text-sm font-bold"
-            style={{
-              backgroundColor: ventilation.ervStatus === "active" ? '#4ade8020' : '#9ca3af20',
-              color: ventilation.ervStatus === "active" ? '#4ade80' : '#9ca3af',
-              border: ventilation.ervStatus === "active" ? '2px solid #4ade8040' : '2px solid #9ca3af40'
-            }}
-          >
-            {ventilation.ervStatus.toUpperCase()}
-          </span>
-        </div>
+        {/* System Status Summary */}
+        <GlassGrid cols={4} colsMd={2} gap={6}>
+          <GlassCard colors={{ primary: "emerald", secondary: "teal" }}>
+            <div className="p-6 text-center">
+              <p className="text-4xl font-bold text-emerald-600 dark:text-emerald-400">
+                {ventilation.heatRecovery}%
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Heat Recovery</p>
+            </div>
+          </GlassCard>
+          <GlassCard colors={{ primary: "emerald", secondary: "teal" }}>
+            <div className="p-6 text-center">
+              <p className="text-4xl font-bold text-gray-900 dark:text-white">
+                {ventilation.filterStatus.length}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Active Filters</p>
+            </div>
+          </GlassCard>
+          <GlassCard colors={{ primary: "emerald", secondary: "teal" }}>
+            <div className="p-6 text-center">
+              <p className="text-4xl font-bold text-green-600 dark:text-green-400">
+                {ventilation.fanSpeeds.filter(f => f.speed > 0).length}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Zones Active</p>
+            </div>
+          </GlassCard>
+          <GlassCard colors={{ primary: "emerald", secondary: "teal" }}>
+            <div className="p-6 text-center">
+              <p className="text-4xl font-bold text-amber-600 dark:text-amber-400">
+                {Math.round(ventilation.fanSpeeds.reduce((sum, f) => sum + f.speed, 0) / ventilation.fanSpeeds.length)}%
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Avg Fan Speed</p>
+            </div>
+          </GlassCard>
+        </GlassGrid>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-green-500/10 rounded-lg p-4">
-            <p className="text-xs text-gray-400 mb-1">Heat Recovery</p>
-            <p className="text-3xl font-bold" style={{ color: '#5dd0b1' }}>{ventilation.heatRecovery}%</p>
-            <p className="text-xs text-gray-500">Efficiency</p>
-          </div>
-          <div className="bg-green-500/10 rounded-lg p-4">
-            <p className="text-xs text-gray-400 mb-1">Air Changes</p>
-            <p className="text-3xl font-bold text-white">{ventilation.exchangeRate}</p>
-            <p className="text-xs text-gray-500">per hour</p>
-          </div>
-          <div className="bg-green-500/10 rounded-lg p-4">
-            <p className="text-xs text-gray-400 mb-1">Temp Delta</p>
-            <p className="text-3xl font-bold" style={{ color: '#60a5fa' }}>{ventilation.indoorOutdoorDelta}°C</p>
-            <p className="text-xs text-gray-500">Indoor/Outdoor</p>
-          </div>
-          <div className="bg-green-500/10 rounded-lg p-4">
-            <p className="text-xs text-gray-400 mb-1">Energy Today</p>
-            <p className="text-3xl font-bold" style={{ color: '#f7c66b' }}>{ventilation.energyUsage}kWh</p>
-            <p className="text-xs text-gray-500">Consumption</p>
-          </div>
-        </div>
+        {/* ERV Status */}
+        <GlassSection colors={{ primary: "emerald", secondary: "teal" }} elevation="standard">
+          <div className="p-8">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-6">
+              <div>
+                <h2 className="text-2xl font-bold mb-2 text-emerald-600 dark:text-emerald-400">
+                  Energy Recovery Ventilator
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400">Heat/cool recovery with fresh air exchange</p>
+              </div>
+              <div className="text-right">
+                <p className="text-5xl font-bold" style={{ color: getModeColor(ventilation.ervStatus.mode) }}>
+                  {ventilation.ervStatus.efficiency}%
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Efficiency</p>
+              </div>
+            </div>
 
-        <div className="border-t border-green-400/20 pt-4">
-          <div className="flex justify-between items-center">
-            <span className="text-gray-400">Bypass Damper:</span>
-            <span className="text-white font-semibold capitalize">{ventilation.bypassDamper}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Filter Status */}
-      <div
-        className="mb-6"
-        style={{
-          ...glassPanel,
-          background: 'linear-gradient(135deg, #5dd0b118, rgba(210, 175, 135, 0.10))',
-          border: '1px solid #5dd0b155',
-        }}
-      >
-        <h2 className="text-xl font-bold mb-4" style={{ color: '#5dd0b1' }}>Filter Status & Maintenance</h2>
-        
-        <div className="space-y-4">
-          {ventilation.filterStatus.map((filter, idx) => (
-            <div key={idx} className="bg-green-500/10 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <p className="font-bold text-white">{filter.location}</p>
-                  <p className="text-sm text-gray-400">{filter.type}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-2xl font-bold" style={{ 
-                    color: filter.lifeRemaining > 50 ? '#4ade80' : filter.lifeRemaining > 25 ? '#f59e0b' : '#ef4444'
-                  }}>
-                    {filter.lifeRemaining}%
+            <GlassGrid cols={2} colsMd={1} gap={4} className="mb-6">
+              <GlassCard colors={{ primary: "emerald", secondary: "teal" }}>
+                <div className="p-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Supply Temperature</p>
+                  <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+                    {ventilation.ervStatus.supplyTemp}°C
                   </p>
-                  <p className="text-xs text-gray-400">Life Remaining</p>
                 </div>
-              </div>
+              </GlassCard>
+              <GlassCard colors={{ primary: "emerald", secondary: "teal" }}>
+                <div className="p-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Exhaust Temperature</p>
+                  <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">
+                    {ventilation.ervStatus.exhaustTemp}°C
+                  </p>
+                </div>
+              </GlassCard>
+            </GlassGrid>
 
-              <div className="mb-3">
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-400">Filter Efficiency</span>
-                  <span className="text-white font-semibold">{filter.efficiency}%</span>
-                </div>
-                <div className="w-full bg-gray-700/30 rounded-full h-2">
-                  <div
-                    className="h-2 rounded-full transition-all"
-                    style={{
-                      width: `${filter.efficiency}%`,
-                      backgroundColor: '#5dd0b1'
-                    }}
-                  />
-                </div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-gray-600 dark:text-gray-400">Mode:</span>
+                <span className="font-bold capitalize" style={{ color: getModeColor(ventilation.ervStatus.mode) }}>
+                  {ventilation.ervStatus.mode}
+                </span>
               </div>
-
-              <div className="border-t border-green-400/20 pt-2 flex justify-between text-sm">
-                <span className="text-gray-400">Last Changed:</span>
-                <span className="text-white font-semibold">
-                  {new Date(filter.lastChanged).toLocaleDateString()}
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-gray-600 dark:text-gray-400">Status:</span>
+                <span className="font-bold" style={{ color: ventilation.ervStatus.isRunning ? '#4ade80' : '#9ca3af' }}>
+                  {ventilation.ervStatus.isRunning ? '✓ Running' : '✕ Off'}
                 </span>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
+        </GlassSection>
 
-      {/* Fan Speeds by Zone */}
-      <div
-        style={{
-          ...glassPanel,
-          background: 'linear-gradient(135deg, #5dd0b118, rgba(210, 175, 135, 0.10))',
-          border: '1px solid #5dd0b155',
-        }}
-      >
-        <h2 className="text-xl font-bold mb-4" style={{ color: '#5dd0b1' }}>Zone Ventilation Controls</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {ventilation.fanSpeeds.map((fan, idx) => (
-            <div key={idx} className="bg-green-500/10 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-bold text-white">{fan.zone}</h3>
-                <span
-                  className="px-3 py-1 rounded-full text-xs font-bold"
-                  style={{
-                    backgroundColor: `${getModeColor(fan.mode)}20`,
-                    color: getModeColor(fan.mode),
-                    border: `1px solid ${getModeColor(fan.mode)}40`
-                  }}
-                >
-                  {fan.mode.toUpperCase()}
-                </span>
-              </div>
-
-              <div className="mb-2">
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-400">Fan Speed</span>
-                  <span className="text-white font-semibold">{fan.speed}%</span>
-                </div>
-                <div className="w-full bg-gray-700/30 rounded-full h-3">
-                  <div
-                    className="h-3 rounded-full transition-all"
-                    style={{
-                      width: `${fan.speed}%`,
-                      backgroundColor: getModeColor(fan.mode)
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 mt-3">
-                <div className="w-2 h-2 rounded-full" style={{ 
-                  backgroundColor: fan.speed > 0 ? '#4ade80' : '#9ca3af'
-                }}/>
-                <span className="text-xs text-gray-400">
-                  {fan.speed > 0 ? 'Actively ventilating' : 'Standby'}
-                </span>
-              </div>
+        {/* Filter Status */}
+        <GlassSection colors={{ primary: "emerald", secondary: "teal" }} elevation="standard">
+          <div className="p-8">
+            <h2 className="text-2xl font-bold mb-6 text-emerald-600 dark:text-emerald-400">Filter Status</h2>
+            <div className="space-y-4">
+              {ventilation.filterStatus.map((filter) => (
+                <GlassCard key={filter.type} colors={{ primary: "emerald", secondary: "teal" }}>
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-bold text-gray-900 dark:text-white capitalize">{filter.type} Filter</h3>
+                      <span className="text-sm font-semibold" style={{ color: filter.life > 50 ? '#4ade80' : filter.life > 25 ? '#f59e0b' : '#ef4444' }}>
+                        {filter.life}% Life
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-300 dark:bg-gray-700 rounded-full h-2">
+                      <div
+                        className="h-2 rounded-full transition-all"
+                        style={{
+                          width: `${filter.life}%`,
+                          backgroundColor: filter.life > 50 ? '#4ade80' : filter.life > 25 ? '#f59e0b' : '#ef4444'
+                        }}
+                      />
+                    </div>
+                  </div>
+                </GlassCard>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
+        </GlassSection>
 
-      {/* System Summary */}
-      <div
-        className="mt-6"
-        style={{
-          ...glassPanel,
-          background: 'linear-gradient(135deg, #5dd0b118, rgba(210, 175, 135, 0.10))',
-          border: '1px solid #5dd0b155',
-        }}
-      >
-        <h2 className="text-xl font-bold mb-4" style={{ color: '#5dd0b1' }}>
-          Ventilation System Overview
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center">
-            <p className="text-3xl font-bold" style={{ color: '#5dd0b1' }}>
-              {ventilation.heatRecovery}%
-            </p>
-            <p className="text-sm text-gray-400">Heat Recovery</p>
+        {/* Fan Speeds by Zone */}
+        <GlassSection colors={{ primary: "emerald", secondary: "teal" }} elevation="standard">
+          <div className="p-8">
+            <h2 className="text-2xl font-bold mb-6 text-emerald-600 dark:text-emerald-400">Zone Fan Speeds</h2>
+            <GlassGrid cols={2} colsMd={1} gap={4}>
+              {ventilation.fanSpeeds.map((fan) => (
+                <GlassCard key={fan.zone} colors={{ primary: "emerald", secondary: "teal" }}>
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-bold text-gray-900 dark:text-white">{fan.zone}</h3>
+                      <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{fan.speed}%</span>
+                    </div>
+                    <div className="w-full bg-gray-300 dark:bg-gray-700 rounded-full h-2">
+                      <div
+                        className="h-2 rounded-full transition-all"
+                        style={{
+                          width: `${fan.speed}%`,
+                          backgroundColor: '#059669'
+                        }}
+                      />
+                    </div>
+                    <div className="flex justify-between mt-3 text-xs">
+                      <span className="text-gray-600 dark:text-gray-400">Min: {fan.minSpeed}%</span>
+                      <span className="text-gray-600 dark:text-gray-400">Max: {fan.maxSpeed}%</span>
+                    </div>
+                  </div>
+                </GlassCard>
+              ))}
+            </GlassGrid>
           </div>
-          <div className="text-center">
-            <p className="text-3xl font-bold text-white">
-              {ventilation.filterStatus.length}
-            </p>
-            <p className="text-sm text-gray-400">Active Filters</p>
+        </GlassSection>
+
+        {/* System Summary */}
+        <GlassSection colors={{ primary: "emerald", secondary: "teal" }} elevation="standard">
+          <div className="p-8">
+            <h2 className="text-2xl font-bold mb-6 text-emerald-600 dark:text-emerald-400">
+              Ventilation System Overview
+            </h2>
+            <GlassGrid cols={4} colsMd={2} gap={4}>
+              <div className="text-center">
+                <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+                  {ventilation.heatRecovery}%
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Heat Recovery</p>
+              </div>
+              <div className="text-center">
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                  {ventilation.filterStatus.length}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Active Filters</p>
+              </div>
+              <div className="text-center">
+                <p className="text-3xl font-bold text-green-600 dark:text-green-400">
+                  {ventilation.fanSpeeds.filter(f => f.speed > 0).length}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Zones Active</p>
+              </div>
+              <div className="text-center">
+                <p className="text-3xl font-bold text-amber-600 dark:text-amber-400">
+                  {Math.round(ventilation.fanSpeeds.reduce((sum, f) => sum + f.speed, 0) / ventilation.fanSpeeds.length)}%
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Avg Fan Speed</p>
+              </div>
+            </GlassGrid>
           </div>
-          <div className="text-center">
-            <p className="text-3xl font-bold" style={{ color: '#4ade80' }}>
-              {ventilation.fanSpeeds.filter(f => f.speed > 0).length}
-            </p>
-            <p className="text-sm text-gray-400">Zones Active</p>
-          </div>
-          <div className="text-center">
-            <p className="text-3xl font-bold" style={{ color: '#f7c66b' }}>
-              {Math.round(ventilation.fanSpeeds.reduce((sum, f) => sum + f.speed, 0) / ventilation.fanSpeeds.length)}%
-            </p>
-            <p className="text-sm text-gray-400">Avg Fan Speed</p>
-          </div>
-        </div>
+        </GlassSection>
       </div>
     </div>
   );
-}
+};

@@ -5,11 +5,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../core/SofieCore";
 import { GlassSection, GlassCard, GlassGrid } from "../theme/GlassmorphismTheme";
+import { createBackHandler } from "../utils/navigation";
 
 const PluginMarketplace = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const ringData = location.state || {};
+  const handleBack = createBackHandler(navigate, location);
   const [availablePlugins, setAvailablePlugins] = useState([
     { id: "weather", name: "Weather Integration", category: "integration", downloads: 1250, rating: 4.8, enabled: true },
     { id: "iot-devices", name: "IoT Device Manager", category: "integration", downloads: 890, rating: 4.6, enabled: true },
@@ -74,7 +76,7 @@ const PluginMarketplace = () => {
         <GlassSection colors={{ primary: "green", secondary: "emerald" }} elevation="high">
           <div style={{ position: 'relative' }}>
             <button
-              onClick={() => navigate("/", { state: { activeRing: ringData.activeRing } })}
+              onClick={handleBack}
               className="return-button"
               style={{
                 position: 'absolute',

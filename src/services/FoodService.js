@@ -29,17 +29,19 @@ class FoodService {
     this.supplyPlanning = null;
   }
 
-  initialize(regionId) {
+  initialize(regionId = "default") {
     try {
       this.currentRegionId = regionId;
       this.status = "initialized";
-      sofieCore.getService("logger").log("[FoodService] Food production module initialized for region: " + regionId);
+      sofieCore.getService("logger")?.log("[FoodService] Food production module initialized for region: " + regionId);
       this.seedLocalData();
       // Fetch food data from backend
-      this.fetchFoodDataFromAPI(regionId);
+      if (regionId && regionId !== "default") {
+        this.fetchFoodDataFromAPI(regionId);
+      }
     } catch (error) {
       this.status = "error";
-      sofieCore.getService("logger").error("[FoodService] Initialization failed", error);
+      sofieCore.getService("logger")?.error("[FoodService] Initialization failed", error);
       throw error;
     }
   }

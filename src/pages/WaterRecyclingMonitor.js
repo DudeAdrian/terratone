@@ -5,11 +5,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../core/SofieCore";
 import { GlassCard, GlassButton, GlassSection, GlassContainer, GlassGrid } from "../theme/GlassmorphismTheme";
+import { createBackHandler } from "../utils/navigation";
 
 const WaterRecyclingMonitor = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const ringData = location.state || {};
+  const handleBack = createBackHandler(navigate, location);
   const [waterService, setWaterService] = useState(null);
   const [systems, setSystems] = useState([]);
   const [selectedSystem, setSelectedSystem] = useState(null);
@@ -67,7 +69,7 @@ const WaterRecyclingMonitor = () => {
         <GlassSection colors={{ primary: "blue", secondary: "cyan" }} elevation="high">
           <div className="py-12 px-8" style={{ position: 'relative' }}>
             <button
-              onClick={() => navigate("/", { state: { activeRing: ringData.activeRing } })}
+              onClick={handleBack}
               className="return-button"
               style={{
                 position: 'absolute',

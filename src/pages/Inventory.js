@@ -5,11 +5,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../core/SofieCore";
 import { QuantumSection, QuantumCard, QuantumGlassGrid } from "../theme/QuantumGlassTheme";
+import { createBackHandler } from "../utils/navigation";
 
 const Inventory = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const ringData = location.state || {};
+  const handleBack = createBackHandler(navigate, location);
   const [inventory, setInventory] = useState({});
   const [selectedCategory, setSelectedCategory] = useState("food");
   const [newItem, setNewItem] = useState("");
@@ -41,7 +43,7 @@ const Inventory = () => {
         <QuantumSection chakra="heart" opacityLevel="crystal" blurLevel="deep" edgeGlow>
           <div style={{ position: 'relative' }}>
             <button
-              onClick={() => navigate("/", { state: { activeRing: ringData.activeRing } })}
+              onClick={handleBack}
               className="return-button"
               style={{
                 position: 'absolute',

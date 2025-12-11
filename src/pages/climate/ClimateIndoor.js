@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../../core/SofieCore";
-import { glassPanel } from "../../theme/glassTokens";
+import { GlassSection, GlassCard, GlassGrid } from "../../theme/GlassmorphismTheme";
+import { createBackHandler } from "../../utils/navigation";
 
 export default function ClimateIndoor() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const ringData = location.state || {};
+  const handleBack = createBackHandler(navigate, location);
   const [indoorClimate, setIndoorClimate] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -22,16 +29,20 @@ export default function ClimateIndoor() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-gray-900 flex items-center justify-center">
-        <div style={glassPanel} className="text-white">Loading climate data...</div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
+        <GlassCard colors={{ primary: "emerald", secondary: "teal" }}>
+          <div className="p-8 text-gray-700 dark:text-gray-300">Loading indoor climate data...</div>
+        </GlassCard>
       </div>
     );
   }
 
   if (!indoorClimate) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-gray-900 flex items-center justify-center">
-        <div style={glassPanel} className="text-white">No climate data available</div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
+        <GlassCard colors={{ primary: "emerald", secondary: "teal" }}>
+          <div className="p-8 text-gray-700 dark:text-gray-300">No indoor climate data available</div>
+        </GlassCard>
       </div>
     );
   }
@@ -46,219 +57,85 @@ export default function ClimateIndoor() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-gray-900 p-6">
-      {/* Header */}
-      <div style={{ 
-        ...glassPanel, 
-        background: 'linear-gradient(135deg, #5dd0b122, rgba(210, 175, 135, 0.12))',
-        border: '1px solid #5dd0b166',
-        boxShadow: '0 10px 28px rgba(0, 0, 0, 0.28), 0 0 24px #5dd0b155, inset 0 0 16px rgba(255, 255, 255, 0.08)',
-        marginBottom: '24px'
-      }}>
-        <h1 className="text-3xl font-bold mb-2" style={{ color: '#5dd0b1' }}>
-          🏠 Indoor Climate Control
-        </h1>
-        <p className="text-gray-300">Multi-zone HVAC monitoring and comfort optimization</p>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div
-          style={{
-            ...glassPanel,
-            background: 'linear-gradient(135deg, #5dd0b118, rgba(210, 175, 135, 0.10))',
-            border: '1px solid #5dd0b155',
-          }}
-        >
-          <p className="text-sm text-gray-400 mb-2">Overall Comfort</p>
-          <p className="text-4xl font-bold" style={{ color: '#5dd0b1' }}>{indoorClimate.overallComfort}%</p>
-          <p className="text-xs text-gray-500 mt-2">All zones average</p>
-        </div>
-
-        <div
-          style={{
-            ...glassPanel,
-            background: 'linear-gradient(135deg, #60a5fa18, rgba(210, 175, 135, 0.10))',
-            border: '1px solid #60a5fa55',
-          }}
-        >
-          <p className="text-sm text-gray-400 mb-2">Active Zones</p>
-          <p className="text-4xl font-bold text-white">{indoorClimate.zones.length}</p>
-          <p className="text-xs text-gray-500 mt-2">Climate controlled</p>
-        </div>
-
-        <div
-          style={{
-            ...glassPanel,
-            background: 'linear-gradient(135deg, #4ade8018, rgba(210, 175, 135, 0.10))',
-            border: '1px solid #4ade8055',
-          }}
-        >
-          <p className="text-sm text-gray-400 mb-2">System Status</p>
-          <p className="text-3xl font-bold" style={{ color: '#4ade80' }}>
-            {indoorClimate.systemStatus.toUpperCase()}
-          </p>
-          <p className="text-xs text-gray-500 mt-2">All systems operational</p>
-        </div>
-
-        <div
-          style={{
-            ...glassPanel,
-            background: 'linear-gradient(135deg, #f7c66b18, rgba(210, 175, 135, 0.10))',
-            border: '1px solid #f7c66b55',
-          }}
-        >
-          <p className="text-sm text-gray-400 mb-2">Energy Today</p>
-          <p className="text-4xl font-bold" style={{ color: '#f7c66b' }}>{indoorClimate.totalEnergyUse}kWh</p>
-          <p className="text-xs text-gray-500 mt-2">HVAC consumption</p>
-        </div>
-      </div>
-
-      {/* Zone Details */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {indoorClimate.zones.map((zone) => (
-          <div
-            key={zone.zoneId}
-            style={{
-              ...glassPanel,
-              background: 'linear-gradient(135deg, #5dd0b118, rgba(210, 175, 135, 0.10))',
-              border: '1px solid #5dd0b155',
-            }}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold" style={{ color: '#5dd0b1' }}>{zone.zoneId}</h2>
-              <div className="flex gap-2">
-                <span
-                  className="px-3 py-1 rounded-full text-xs font-bold"
-                  style={{
-                    backgroundColor: `${getHvacModeColor(zone.hvacMode)}20`,
-                    color: getHvacModeColor(zone.hvacMode),
-                    border: `1px solid ${getHvacModeColor(zone.hvacMode)}40`
-                  }}
-                >
-                  {zone.hvacMode.toUpperCase()}
-                </span>
-              </div>
-            </div>
-
-            {/* Temperature Display */}
-            <div className="mb-4">
-              <div className="flex items-end justify-between mb-2">
-                <div>
-                  <p className="text-sm text-gray-400">Current Temperature</p>
-                  <p className="text-4xl font-bold text-white">{zone.currentTemp}°C</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-gray-400">Target</p>
-                  <p className="text-2xl font-bold" style={{ color: '#5dd0b1' }}>{zone.targetTemp}°C</p>
-                </div>
-              </div>
-              <div className="w-full bg-gray-700/30 rounded-full h-2">
-                <div
-                  className="h-2 rounded-full transition-all"
-                  style={{
-                    width: `${Math.min((zone.currentTemp / 30) * 100, 100)}%`,
-                    backgroundColor: zone.currentTemp < zone.targetTemp ? '#60a5fa' : '#ef4444'
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Metrics Grid */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="bg-green-500/10 rounded-lg p-3">
-                <p className="text-xs text-gray-400 mb-1">Humidity</p>
-                <p className="text-2xl font-bold text-white">{zone.humidity}%</p>
-                <p className="text-xs text-gray-500">Target: {zone.targetHumidity}%</p>
-              </div>
-              <div className="bg-green-500/10 rounded-lg p-3">
-                <p className="text-xs text-gray-400 mb-1">CO₂ Level</p>
-                <p className="text-2xl font-bold" style={{ color: zone.co2 < 1000 ? '#4ade80' : '#f59e0b' }}>
-                  {zone.co2}ppm
-                </p>
-                <p className="text-xs text-gray-500">{"<1000 good"}</p>
-              </div>
-              <div className="bg-green-500/10 rounded-lg p-3">
-                <p className="text-xs text-gray-400 mb-1">VOC</p>
-                <p className="text-2xl font-bold text-white">{zone.voc}ppb</p>
-                <p className="text-xs text-gray-500">Volatile compounds</p>
-              </div>
-              <div className="bg-green-500/10 rounded-lg p-3">
-                <p className="text-xs text-gray-400 mb-1">Occupancy</p>
-                <p className="text-2xl font-bold" style={{ color: '#5dd0b1' }}>{zone.occupancy}</p>
-                <p className="text-xs text-gray-500">People present</p>
-              </div>
-            </div>
-
-            {/* Comfort & Fan Speed */}
-            <div className="border-t border-green-400/20 pt-3 space-y-3">
-              <div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-400">Comfort Level</span>
-                  <span className="text-white font-semibold">{zone.comfort}%</span>
-                </div>
-                <div className="w-full bg-gray-700/30 rounded-full h-2">
-                  <div
-                    className="h-2 rounded-full transition-all"
-                    style={{
-                      width: `${zone.comfort}%`,
-                      backgroundColor: '#5dd0b1'
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Fan Speed:</span>
-                <span className="text-white font-semibold capitalize">{zone.fanSpeed}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Energy Today:</span>
-                <span className="text-white font-semibold">{zone.energyUse}kWh</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* System Overview */}
-      <div
-        className="mt-6"
-        style={{
-          ...glassPanel,
-          background: 'linear-gradient(135deg, #5dd0b118, rgba(210, 175, 135, 0.10))',
-          border: '1px solid #5dd0b155',
-        }}
-      >
-        <h2 className="text-xl font-bold mb-4" style={{ color: '#5dd0b1' }}>
-          Climate Control Summary
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center">
-            <p className="text-3xl font-bold text-white">
-              {(indoorClimate.zones.reduce((sum, z) => sum + z.currentTemp, 0) / indoorClimate.zones.length).toFixed(1)}°C
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <GlassSection colors={{ primary: "emerald", secondary: "teal" }} elevation="high">
+          <div className="py-12 px-8" style={{ position: 'relative' }}>
+            <button
+              onClick={handleBack}
+              className="return-button"
+              style={{
+                position: 'absolute',
+                top: '12px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                color: '#059669'
+              }}
+            >
+              <FaArrowLeft size={12} /> {ringData.ringName || 'Back'}
+            </button>
+            <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
+              🏠 Indoor Climate Control
+            </h1>
+            <p className="text-lg text-gray-700 dark:text-gray-200 max-w-2xl">
+              Multi-zone HVAC monitoring and comfort optimization
             </p>
-            <p className="text-sm text-gray-400">Avg Temperature</p>
           </div>
-          <div className="text-center">
-            <p className="text-3xl font-bold" style={{ color: '#5dd0b1' }}>
-              {Math.round(indoorClimate.zones.reduce((sum, z) => sum + z.humidity, 0) / indoorClimate.zones.length)}%
-            </p>
-            <p className="text-sm text-gray-400">Avg Humidity</p>
+        </GlassSection>
+
+        <GlassGrid cols={2} colsMd={4} gap={6}>
+          {indoorClimate.zones.map((zone) => (
+            <GlassCard key={zone.zoneId} colors={{ primary: "emerald", secondary: "teal" }}>
+              <div className="flex flex-col items-center justify-center min-h-[140px]">
+                <p className="text-lg text-gray-600 dark:text-gray-400 mb-2">{zone.zoneId}</p>
+                <p className="text-5xl font-bold text-emerald-600 dark:text-emerald-400">{zone.currentTemp}°C</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Target: {zone.targetTemp}°C</p>
+              </div>
+            </GlassCard>
+          ))}
+        </GlassGrid>
+
+        <GlassSection colors={{ primary: "emerald", secondary: "teal" }}>
+          <div className="p-8">
+            <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
+              Climate Summary
+            </h2>
+            <GlassGrid cols={2} colsMd={4} gap={4}>
+              <GlassCard>
+                <div className="flex flex-col items-center justify-center min-h-[120px]">
+                  <p className="text-4xl font-bold text-gray-900 dark:text-white">
+                    {(indoorClimate.zones.reduce((sum, z) => sum + z.currentTemp, 0) / indoorClimate.zones.length).toFixed(1)}°C
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Avg Temperature</p>
+                </div>
+              </GlassCard>
+              <GlassCard colors={{ primary: "emerald", secondary: "teal" }}>
+                <div className="flex flex-col items-center justify-center min-h-[120px]">
+                  <p className="text-4xl font-bold text-emerald-600 dark:text-emerald-400">
+                    {Math.round(indoorClimate.zones.reduce((sum, z) => sum + z.humidity, 0) / indoorClimate.zones.length)}%
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Avg Humidity</p>
+                </div>
+              </GlassCard>
+              <GlassCard colors={{ primary: "blue", secondary: "sky" }}>
+                <div className="flex flex-col items-center justify-center min-h-[120px]">
+                  <p className="text-4xl font-bold text-blue-600 dark:text-blue-400">
+                    {Math.round(indoorClimate.zones.reduce((sum, z) => sum + z.co2, 0) / indoorClimate.zones.length)}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Avg CO₂ (ppm)</p>
+                </div>
+              </GlassCard>
+              <GlassCard colors={{ primary: "emerald", secondary: "green" }}>
+                <div className="flex flex-col items-center justify-center min-h-[120px]">
+                  <p className="text-4xl font-bold text-emerald-600 dark:text-emerald-400">
+                    {indoorClimate.zones.reduce((sum, z) => sum + z.occupancy, 0)}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Total Occupants</p>
+                </div>
+              </GlassCard>
+            </GlassGrid>
           </div>
-          <div className="text-center">
-            <p className="text-3xl font-bold" style={{ color: '#60a5fa' }}>
-              {Math.round(indoorClimate.zones.reduce((sum, z) => sum + z.co2, 0) / indoorClimate.zones.length)}
-            </p>
-            <p className="text-sm text-gray-400">Avg CO₂ (ppm)</p>
-          </div>
-          <div className="text-center">
-            <p className="text-3xl font-bold" style={{ color: '#4ade80' }}>
-              {indoorClimate.zones.reduce((sum, z) => sum + z.occupancy, 0)}
-            </p>
-            <p className="text-sm text-gray-400">Total Occupants</p>
-          </div>
-        </div>
+        </GlassSection>
       </div>
     </div>
   );

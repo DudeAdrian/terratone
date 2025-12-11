@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../../core/SofieCore";
-import { glassPanel } from "../../theme/glassTokens";
+import { GlassSection, GlassCard, GlassGrid } from "../../theme/GlassmorphismTheme";
+import { createBackHandler } from "../../utils/navigation";
 
 export default function FoodSafety() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const ringData = location.state || {};
+  const handleBack = createBackHandler(navigate, location);
   const [safetyRecords, setSafetyRecords] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -22,8 +29,10 @@ export default function FoodSafety() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-orange-600 to-gray-900 flex items-center justify-center">
-        <div style={glassPanel} className="text-white">Loading safety records...</div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
+        <GlassCard colors={{ primary: "amber", secondary: "orange" }}>
+          <div className="p-8 text-gray-700 dark:text-gray-300">Loading safety records...</div>
+        </GlassCard>
       </div>
     );
   }
@@ -36,195 +45,146 @@ export default function FoodSafety() {
   const overallScore = Math.round((passedTests / safetyRecords.length) * 100);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-orange-600 to-gray-900 p-6">
-      {/* Header */}
-      <div style={{ 
-        ...glassPanel, 
-        background: 'linear-gradient(135deg, #f5a87322, rgba(210, 175, 135, 0.12))',
-        border: '1px solid #f5a87366',
-        boxShadow: '0 10px 28px rgba(0, 0, 0, 0.28), 0 0 24px #f5a87355, inset 0 0 16px rgba(255, 255, 255, 0.08)',
-        marginBottom: '24px'
-      }}>
-        <h1 className="text-3xl font-bold mb-2" style={{ color: '#f5a873' }}>
-          ✓ Food Safety
-        </h1>
-        <p className="text-gray-300">Quality control tests and contamination monitoring</p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        
+        {/* Header */}
+        <GlassSection colors={{ primary: "amber", secondary: "orange" }} elevation="high">
+          <div className="py-12 px-8" style={{ position: 'relative' }}>
+            <button
+              onClick={handleBack}
+              style={{
+                position: 'absolute',
+                top: '12px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                color: '#ea580c'
+              }}
+            >
+              <FaArrowLeft size={12} /> {ringData.ringName || 'Back'}
+            </button>
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
+              ✓ Food Safety
+            </h1>
+            <p className="text-lg text-gray-700 dark:text-gray-200 mt-4 max-w-2xl">Quality control tests and contamination monitoring</p>
+          </div>
+        </GlassSection>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div
-          style={{
-            ...glassPanel,
-            background: 'linear-gradient(135deg, #4ade8018, rgba(210, 175, 135, 0.10))',
-            border: '1px solid #4ade8055',
-          }}
-        >
-          <p className="text-sm text-gray-400 mb-2">Safety Score</p>
-          <p className="text-4xl font-bold text-white">{overallScore}%</p>
-          <p className="text-xs text-gray-500 mt-2">All tests passed</p>
-        </div>
-
-        <div
-          style={{
-            ...glassPanel,
-            background: 'linear-gradient(135deg, #f5a87318, rgba(210, 175, 135, 0.10))',
-            border: '1px solid #f5a87355',
-          }}
-        >
-          <p className="text-sm text-gray-400 mb-2">Total Tests</p>
-          <p className="text-4xl font-bold" style={{ color: '#f5a873' }}>{safetyRecords.length}</p>
-          <p className="text-xs text-gray-500 mt-2">Conducted this season</p>
-        </div>
-
-        <div
-          style={{
-            ...glassPanel,
-            background: 'linear-gradient(135deg, #22d3ee18, rgba(210, 175, 135, 0.10))',
-            border: '1px solid #22d3ee55',
-          }}
-        >
-          <p className="text-sm text-gray-400 mb-2">Passed Tests</p>
-          <p className="text-4xl font-bold" style={{ color: '#22d3ee' }}>{passedTests}</p>
-          <p className="text-xs text-gray-500 mt-2">No contamination</p>
-        </div>
-
-        <div
-          style={{
-            ...glassPanel,
-            background: 'linear-gradient(135deg, #60a5fa18, rgba(210, 175, 135, 0.10))',
-            border: '1px solid #60a5fa55',
-          }}
-        >
-          <p className="text-sm text-gray-400 mb-2">Latest Test</p>
-          <p className="text-2xl font-bold" style={{ color: '#60a5fa' }}>
-            {safetyRecords.length > 0
-              ? new Date(safetyRecords[safetyRecords.length - 1].testDate).toLocaleDateString()
-              : "N/A"}
-          </p>
-          <p className="text-xs text-gray-500 mt-2">Test completion</p>
-        </div>
-      </div>
-
-      {/* Safety Records Timeline */}
-      <div className="space-y-4">
-        {safetyRecords.map((record, idx) => (
-          <div
-            key={record.testId}
-            style={{
-              ...glassPanel,
-              background: 'linear-gradient(135deg, #f5a87318, rgba(210, 175, 135, 0.10))',
-              border: '1px solid #f5a87355',
-            }}
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h3 className="text-lg font-bold" style={{ color: '#f5a873' }}>
-                    {record.testType}
-                  </h3>
-                  <span
-                    className="px-3 py-1 rounded-full text-xs font-bold"
-                    style={{
-                      backgroundColor: `${getResultColor(record.result)}20`,
-                      color: getResultColor(record.result),
-                      border: `1px solid ${getResultColor(record.result)}40`
-                    }}
-                  >
-                    {record.result}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-400">
-                  {record.description}
-                </p>
-              </div>
-              <div className="text-right ml-4">
-                <p className="text-xs text-gray-500">
-                  {new Date(record.testDate).toLocaleDateString()}
-                </p>
-              </div>
+        {/* Summary Cards */}
+        <GlassGrid cols={4} colsMd={2} gap={6}>
+          <GlassCard colors={{ primary: "green", secondary: "emerald" }}>
+            <div className="p-6 text-center">
+              <p className="text-4xl font-bold text-green-600 dark:text-green-400">{overallScore}%</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Safety Score</p>
+              <p className="text-xs text-gray-500 dark:text-gray-500">All tests passed</p>
             </div>
+          </GlassCard>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div className="bg-orange-500/10 rounded-lg p-3">
-                <p className="text-xs text-gray-400 mb-1">Tested Sample</p>
-                <p className="text-sm font-bold text-white">{record.testedSample}</p>
-              </div>
-              <div className="bg-orange-500/10 rounded-lg p-3">
-                <p className="text-xs text-gray-400 mb-1">Location</p>
-                <p className="text-sm font-bold text-white">{record.location}</p>
-              </div>
+          <GlassCard colors={{ primary: "amber", secondary: "orange" }}>
+            <div className="p-6 text-center">
+              <p className="text-4xl font-bold text-amber-600 dark:text-amber-400">{safetyRecords.length}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Total Tests</p>
+              <p className="text-xs text-gray-500 dark:text-gray-500">Conducted this season</p>
             </div>
+          </GlassCard>
 
-            {/* Test Details */}
-            <div className="border-t border-orange-400/20 pt-3">
-              <p className="text-sm font-bold text-gray-300 mb-2">Test Parameters</p>
-              <div className="space-y-2 text-sm">
-                {record.parameters.map((param, idx) => (
-                  <div key={idx} className="flex justify-between text-gray-400">
-                    <span>{param.name}:</span>
-                    <span className={param.status === "PASS" ? "text-green-400 font-bold" : "text-orange-400 font-bold"}>
-                      {param.value} {param.status === "PASS" ? "✓" : "⚠"}
-                    </span>
+          <GlassCard colors={{ primary: "cyan", secondary: "blue" }}>
+            <div className="p-6 text-center">
+              <p className="text-4xl font-bold text-cyan-600 dark:text-cyan-400">{passedTests}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Passed Tests</p>
+              <p className="text-xs text-gray-500 dark:text-gray-500">No contamination</p>
+            </div>
+          </GlassCard>
+
+          <GlassCard colors={{ primary: "blue", secondary: "indigo" }}>
+            <div className="p-6 text-center">
+              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                {safetyRecords.length > 0
+                  ? new Date(safetyRecords[safetyRecords.length - 1].testDate).toLocaleDateString()
+                  : "N/A"}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Latest Test</p>
+              <p className="text-xs text-gray-500 dark:text-gray-500">Test completion</p>
+            </div>
+          </GlassCard>
+        </GlassGrid>
+
+        {/* Safety Records Timeline */}
+        <GlassSection colors={{ primary: "amber", secondary: "orange" }} elevation="standard">
+          <div className="p-8">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Safety Test Records</h2>
+            <div className="space-y-4">
+              {safetyRecords.map((record, idx) => (
+                <GlassCard key={record.testId} colors={{ primary: "amber", secondary: "orange" }}>
+                  <div className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-lg font-bold text-amber-600 dark:text-amber-400">
+                            {record.testType}
+                          </h3>
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-bold ${
+                              record.result === "PASS"
+                                ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                                : "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400"
+                            }`}
+                          >
+                            {record.result}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {record.description}
+                        </p>
+                      </div>
+                      <div className="text-right ml-4">
+                        <p className="text-xs text-gray-500 dark:text-gray-500">
+                          {new Date(record.testDate).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div className="bg-gray-100 dark:bg-gray-800/50 rounded-lg p-3">
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Tested Sample</p>
+                        <p className="text-sm font-bold text-gray-900 dark:text-white">{record.testedSample}</p>
+                      </div>
+                      <div className="bg-gray-100 dark:bg-gray-800/50 rounded-lg p-3">
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Location</p>
+                        <p className="text-sm font-bold text-gray-900 dark:text-white">{record.location}</p>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mb-3">
+                      <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Test Parameters</p>
+                      <div className="space-y-2 text-sm">
+                        {record.parameters.map((param, idx) => (
+                          <div key={idx} className="flex justify-between text-gray-600 dark:text-gray-400">
+                            <span>{param.name}:</span>
+                            <span className={param.status === "PASS" ? "text-green-600 dark:text-green-400 font-bold" : "text-orange-600 dark:text-orange-400 font-bold"}>
+                              {param.value} {param.status === "PASS" ? "✓" : "⚠"}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {record.notes && (
+                      <div className="mb-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3">
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Notes</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300">{record.notes}</p>
+                      </div>
+                    )}
+
+                    <div className="text-xs text-gray-500 dark:text-gray-500 border-t border-gray-200 dark:border-gray-700 pt-3">
+                      <span>Tested by: <span className="text-gray-700 dark:text-gray-400 font-semibold">{record.testedBy}</span></span>
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Notes */}
-            {record.notes && (
-              <div className="mt-3 bg-orange-500/10 rounded-lg p-3">
-                <p className="text-xs text-gray-400 mb-1">Notes</p>
-                <p className="text-sm text-gray-300">{record.notes}</p>
-              </div>
-            )}
-
-            {/* Technician */}
-            <div className="mt-3 text-xs text-gray-500 border-t border-orange-400/20 pt-3">
-              <span>Tested by: <span className="text-gray-400 font-semibold">{record.testedBy}</span></span>
+                </GlassCard>
+              ))}
             </div>
           </div>
-        ))}
-      </div>
-
-      {/* Safety Summary */}
-      <div
-        className="mt-6"
-        style={{
-          ...glassPanel,
-          background: 'linear-gradient(135deg, #f5a87318, rgba(210, 175, 135, 0.10))',
-          border: '1px solid #f5a87355',
-        }}
-      >
-        <h2 className="text-xl font-bold mb-4" style={{ color: '#f5a873' }}>
-          Safety Assessment
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center">
-            <p className="text-3xl font-bold" style={{ color: '#4ade80' }}>
-              {overallScore}%
-            </p>
-            <p className="text-sm text-gray-400">Overall Safety</p>
-          </div>
-          <div className="text-center">
-            <p className="text-3xl font-bold" style={{ color: '#22d3ee' }}>
-              {passedTests}
-            </p>
-            <p className="text-sm text-gray-400">Passed Tests</p>
-          </div>
-          <div className="text-center">
-            <p className="text-3xl font-bold text-white">
-              {safetyRecords.length - passedTests}
-            </p>
-            <p className="text-sm text-gray-400">Issues Found</p>
-          </div>
-          <div className="text-center">
-            <p className="text-3xl font-bold" style={{ color: '#60a5fa' }}>
-              {safetyRecords.length}
-            </p>
-            <p className="text-sm text-gray-400">Total Tests</p>
-          </div>
-        </div>
+        </GlassSection>
       </div>
     </div>
   );

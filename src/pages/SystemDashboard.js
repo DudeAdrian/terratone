@@ -4,11 +4,13 @@ import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../core/SofieCore";
 import eventBus, { EVENTS } from "../core/EventBus";
 import { GlassSection, GlassCard, GlassGrid } from "../theme/GlassmorphismTheme";
+import { createBackHandler } from "../utils/navigation";
 
 const SystemDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const ringData = location.state || {};
+  const handleBack = createBackHandler(navigate, location);
   const [services, setServices] = useState({});
   const [systemHealth, setSystemHealth] = useState(null);
   const [recentAlerts, setRecentAlerts] = useState([]);
@@ -78,7 +80,7 @@ const SystemDashboard = () => {
         <GlassSection colors={{ primary: "gray", secondary: "slate" }} elevation="high">
           <div className="py-12 px-8" style={{ position: 'relative' }}>
             <button
-              onClick={() => navigate("/", { state: { activeRing: ringData.activeRing } })}
+              onClick={handleBack}
               className="return-button"
               style={{
                 position: 'absolute',

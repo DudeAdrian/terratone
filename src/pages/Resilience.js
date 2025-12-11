@@ -3,11 +3,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../core/SofieCore";
 import { GlassSection, GlassCard, GlassGrid, GlassButton } from "../theme/GlassmorphismTheme";
+import { createBackHandler } from "../utils/navigation";
 
 const Resilience = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const ringData = location.state || {};
+  const handleBack = createBackHandler(navigate, location);
   const [emergencyPlans, setEmergencyPlans] = useState([]);
   const [resources, setResources] = useState({});
   const [risks, setRisks] = useState([]);
@@ -45,7 +47,7 @@ const Resilience = () => {
         <GlassSection colors={{ primary: "red", secondary: "rose" }} elevation="high">
           <div className="py-12 px-8" style={{ position: 'relative' }}>
             <button
-              onClick={() => navigate("/", { state: { activeRing: ringData.activeRing } })}
+              onClick={handleBack}
               className="return-button"
               style={{
                 position: 'absolute',

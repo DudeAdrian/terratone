@@ -4,11 +4,13 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import { GlassSection, GlassCard, GlassGrid } from "../theme/GlassmorphismTheme";
+import { createBackHandler } from "../utils/navigation";
 
 const IoT = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const ringData = location.state || {};
+  const handleBack = createBackHandler(navigate, location);
   const [sensors, setSensors] = useState([
     { id: "1", name: "Water pH Monitor", type: "water_ph", location: "Tank A", lastReading: 7.2, status: "active" },
     { id: "2", name: "Soil Moisture", type: "soil_moisture", location: "Garden B", lastReading: 65, status: "active" },
@@ -84,7 +86,7 @@ const IoT = () => {
         <GlassSection colors={{ primary: "slate", secondary: "gray" }} elevation="high">
           <div style={{ position: 'relative' }}>
             <button
-              onClick={() => navigate("/", { state: { activeRing: ringData.activeRing } })}
+              onClick={handleBack}
               className="return-button"
               style={{
                 position: 'absolute',
