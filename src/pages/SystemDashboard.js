@@ -4,6 +4,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../core/SofieCore";
 import eventBus, { EVENTS } from "../core/EventBus";
 import { GlassSection, GlassCard, GlassGrid } from "../theme/GlassmorphismTheme";
+import { useAdminData } from "../hooks/useApi";
 import { createBackHandler } from "../utils/navigation";
 
 const SystemDashboard = () => {
@@ -11,6 +12,7 @@ const SystemDashboard = () => {
   const location = useLocation();
   const ringData = location.state || {};
   const handleBack = createBackHandler(navigate, location);
+  const { data: adminData, loading: adminLoading, error: adminError, refetch } = useAdminData();
   const [services, setServices] = useState({});
   const [systemHealth, setSystemHealth] = useState(null);
   const [recentAlerts, setRecentAlerts] = useState([]);
@@ -29,6 +31,15 @@ const SystemDashboard = () => {
       clearInterval(interval);
     };
   }, []);
+
+  useEffect(() => {
+    // Use admin API data for services if available
+    if (adminData && Array.isArray(adminData.services)) {
+      const byName = {};
+      adminData.services.forEach(s => { byName[s.name || s.id || s] = s; });
+      setServices(byName);
+    }
+  }, [adminData]);
 
   const initializeDashboard = () => {
     try {
@@ -71,6 +82,34 @@ const SystemDashboard = () => {
   const handleClimateChange = (data) => {
     setClimateZone(data.zone);
   };
+
+  if (adminLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
+        <GlassCard colors={{ primary: "gray", secondary: "slate" }}>
+          <div className="p-8 text-gray-700 dark:text-gray-300 flex items-center">
+            <div className="animate-spin inline-block w-6 h-6 border-3 border-gray-500 border-t-transparent rounded-full mr-3"></div>
+            Loading system dashboard...
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
+
+  if (adminError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center p-4">
+        <GlassCard colors={{ primary: "gray", secondary: "slate" }}>
+          <div className="p-8 text-center">
+            <div className="text-5xl mb-4">⚠️</div>
+            <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-2">Error Loading Admin Data</h2>
+            <p className="text-gray-700 dark:text-gray-300 mb-4">{adminError}</p>
+            <button onClick={refetch} className="px-6 py-2 bg-gradient-to-r from-gray-700 to-slate-900 text-white rounded-lg hover:shadow-lg transition-all">Retry</button>
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 p-4 md:p-8">

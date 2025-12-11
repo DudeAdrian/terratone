@@ -1,6 +1,7 @@
 // src/pages/SelfSufficiency_v2.js - Quantum Self-Sufficiency Dashboard with Heart Chakra Theme
 
 import React, { useState } from "react";
+import { useAdminData } from "../hooks/useApi";
 import sofieCore from "../core/SofieCore";
 import { QuantumSection, QuantumCard, QuantumGlassGrid } from "../theme/QuantumGlassTheme";
 
@@ -13,6 +14,35 @@ const SelfSufficiency = () => {
     energy: 71,
     housing: 80,
   });
+  const { data: adminData, loading: adminLoading, error: adminError, refetch } = useAdminData();
+
+  if (adminLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-950 via-gray-900 to-emerald-950 flex items-center justify-center">
+        <QuantumCard chakra="heart">
+          <div className="p-8 text-emerald-100 flex items-center">
+            <div className="animate-spin inline-block w-6 h-6 border-3 border-emerald-400 border-t-transparent rounded-full mr-3"></div>
+            Loading self-sufficiency data...
+          </div>
+        </QuantumCard>
+      </div>
+    );
+  }
+
+  if (adminError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-950 via-gray-900 to-emerald-950 flex items-center justify-center p-4">
+        <QuantumCard chakra="heart">
+          <div className="p-8 text-center">
+            <div className="text-5xl mb-4">⚠️</div>
+            <h2 className="text-xl font-bold text-red-400 mb-2">Error Loading Data</h2>
+            <p className="text-emerald-100/80 mb-4">{adminError}</p>
+            <button onClick={refetch} className="px-6 py-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg hover:shadow-lg transition-all">Retry</button>
+          </div>
+        </QuantumCard>
+      </div>
+    );
+  }
 
   const handleAddFood = () => {
     const foodService = sofieCore.getService("food");

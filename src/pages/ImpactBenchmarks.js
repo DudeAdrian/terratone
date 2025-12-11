@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import sofieCore from "../core/SofieCore";
 import { GlassSection, GlassCard, GlassGrid } from "../theme/GlassmorphismTheme";
+import { useWellnessDataAPI } from "../hooks/useApi";
 
 const ImpactBenchmarks = () => {
+  const { data: apiWellnessData, loading: loadingImpact, error: errorImpact, refetch } = useWellnessDataAPI("default");
   const [metrics, setMetrics] = useState({});
   const [comparison, setComparison] = useState({});
   const [overallScore, setOverallScore] = useState(0);
@@ -10,7 +12,12 @@ const ImpactBenchmarks = () => {
 
   useEffect(() => {
     const impactService = sofieCore.getService("impactMetrics");
-    if (impactService) {
+    if (apiWellnessData) {
+      // Derive impact metrics from available wellness stats until dedicated API exists
+      setMetrics(apiWellnessData.stats || {});
+      setComparison(mockComparison);
+      setOverallScore(apiWellnessData.stats?.wellnessScore || 78);
+    } else if (impactService) {
       setMetrics(impactService.getMetrics?.() || {});
       setComparison(impactService.getBenchmarkComparison?.() || mockComparison);
       setOverallScore(impactService.getOverallScore?.() || 78);
@@ -18,7 +25,35 @@ const ImpactBenchmarks = () => {
       setComparison(mockComparison);
       setOverallScore(78);
     }
-  }, []);
+  }, [apiWellnessData]);
+
+  if (loadingImpact) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-violet-50 dark:from-gray-950 dark:via-gray-900 dark:to-purple-950 flex items-center justify-center">
+        <GlassCard colors={{ primary: "purple", secondary: "violet" }}>
+          <div className="p-8 text-gray-700 dark:text-gray-300 flex items-center">
+            <div className="animate-spin inline-block w-6 h-6 border-3 border-purple-500 border-t-transparent rounded-full mr-3"></div>
+            Loading impact benchmarks...
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
+
+  if (errorImpact) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-violet-50 dark:from-gray-950 dark:via-gray-900 dark:to-purple-950 flex items-center justify-center p-4">
+        <GlassCard colors={{ primary: "purple", secondary: "violet" }}>
+          <div className="p-8 text-center">
+            <div className="text-5xl mb-4">⚠️</div>
+            <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-2">Error Loading Impact Data</h2>
+            <p className="text-gray-700 dark:text-gray-300 mb-4">{errorImpact}</p>
+            <button onClick={refetch} className="px-6 py-2 bg-gradient-to-r from-purple-700 to-violet-900 text-white rounded-lg hover:shadow-lg transition-all">Retry</button>
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
 
   const mockComparison = {
     energyGeneration: { current: "850 kWh", target: "900 kWh", percentageOfTarget: 94 },

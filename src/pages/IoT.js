@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import { GlassSection, GlassCard, GlassGrid } from "../theme/GlassmorphismTheme";
+import { useCommunityData } from "../hooks/useApi";
 import { createBackHandler } from "../utils/navigation";
 
 const IoT = () => {
@@ -11,6 +12,7 @@ const IoT = () => {
   const location = useLocation();
   const ringData = location.state || {};
   const handleBack = createBackHandler(navigate, location);
+  const { data: communityApi, loading: iotLoading, error: iotError, refetch } = useCommunityData("default");
   const [sensors, setSensors] = useState([
     { id: "1", name: "Water pH Monitor", type: "water_ph", location: "Tank A", lastReading: 7.2, status: "active" },
     { id: "2", name: "Soil Moisture", type: "soil_moisture", location: "Garden B", lastReading: 65, status: "active" },
@@ -27,6 +29,19 @@ const IoT = () => {
     location: "",
     name: "",
   });
+
+  // Merge sensors from API if present
+  useEffect(() => {
+    const apiSensors = communityApi?.sensors || communityApi?.iotSensors || [];
+    if (Array.isArray(apiSensors) && apiSensors.length) {
+      setSensors(apiSensors);
+      setHealth({
+        active: apiSensors.filter(s => s.status === 'active').length,
+        inactive: apiSensors.filter(s => s.status === 'inactive').length,
+        stale: apiSensors.filter(s => s.status === 'stale').length,
+      });
+    }
+  }, [communityApi]);
 
   const handleAddSensor = () => {
     if (!newSensor.name || !newSensor.location) {
@@ -79,6 +94,33 @@ const IoT = () => {
     return "🟢 OK";
   };
 
+  if (iotLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
+        <GlassCard colors={{ primary: "slate", secondary: "gray" }}>
+          <div className="p-8 text-slate-700 dark:text-slate-300 flex items-center">
+            <div className="animate-spin inline-block w-6 h-6 border-3 border-slate-500 border-t-transparent rounded-full mr-3"></div>
+            Loading IoT data...
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
+
+  if (iotError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center p-4">
+        <GlassCard colors={{ primary: "slate", secondary: "gray" }}>
+          <div className="p-8 text-center">
+            <div className="text-5xl mb-4">⚠️</div>
+            <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-2">Error Loading IoT Data</h2>
+            <p className="text-slate-700 dark:text-slate-300 mb-4">{iotError}</p>
+            <button onClick={refetch} className="px-6 py-2 bg-gradient-to-r from-slate-700 to-slate-900 text-white rounded-lg hover:shadow-lg transition-all">Retry</button>
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">

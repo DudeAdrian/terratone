@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../core/SofieCore";
 import { GlassSection, GlassCard, GlassGrid } from "../theme/GlassmorphismTheme";
+import { useMarketplaceData } from "../hooks/useApi";
 import { createBackHandler } from "../utils/navigation";
 
 const PluginMarketplace = () => {
@@ -12,6 +13,7 @@ const PluginMarketplace = () => {
   const location = useLocation();
   const ringData = location.state || {};
   const handleBack = createBackHandler(navigate, location);
+  const { data: marketplaceData, loading: marketLoading, error: marketError, refetch } = useMarketplaceData("default");
   const [availablePlugins, setAvailablePlugins] = useState([
     { id: "weather", name: "Weather Integration", category: "integration", downloads: 1250, rating: 4.8, enabled: true },
     { id: "iot-devices", name: "IoT Device Manager", category: "integration", downloads: 890, rating: 4.6, enabled: true },
@@ -26,17 +28,55 @@ const PluginMarketplace = () => {
   });
 
   useEffect(() => {
-    const pluginRegistry = sofieCore.getService("pluginRegistry");
-    if (pluginRegistry) {
-      const available = pluginRegistry.getAvailablePlugins?.() || availablePlugins;
+    if (marketplaceData && Array.isArray(marketplaceData.plugins)) {
+      const available = marketplaceData.plugins;
       setAvailablePlugins(available);
       setStats({
         available: available.length,
         installed: available.filter(p => p.enabled).length,
         active: available.filter(p => p.enabled).length,
       });
+    } else {
+      const pluginRegistry = sofieCore.getService("pluginRegistry");
+      if (pluginRegistry) {
+        const available = pluginRegistry.getAvailablePlugins?.() || availablePlugins;
+        setAvailablePlugins(available);
+        setStats({
+          available: available.length,
+          installed: available.filter(p => p.enabled).length,
+          active: available.filter(p => p.enabled).length,
+        });
+      }
     }
-  }, []);
+  }, [marketplaceData]);
+
+  if (marketLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-gray-950 dark:via-gray-900 dark:to-green-950 flex items-center justify-center">
+        <GlassCard colors={{ primary: "green", secondary: "emerald" }}>
+          <div className="p-8 text-slate-700 dark:text-slate-300 flex items-center">
+            <div className="animate-spin inline-block w-6 h-6 border-3 border-green-500 border-t-transparent rounded-full mr-3"></div>
+            Loading marketplace...
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
+
+  if (marketError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-gray-950 dark:via-gray-900 dark:to-green-950 flex items-center justify-center p-4">
+        <GlassCard colors={{ primary: "green", secondary: "emerald" }}>
+          <div className="p-8 text-center">
+            <div className="text-5xl mb-4">⚠️</div>
+            <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-2">Error Loading Marketplace</h2>
+            <p className="text-slate-700 dark:text-slate-300 mb-4">{marketError}</p>
+            <button onClick={refetch} className="px-6 py-2 bg-gradient-to-r from-green-700 to-emerald-900 text-white rounded-lg hover:shadow-lg transition-all">Retry</button>
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
 
   const handleInstallPlugin = (pluginId) => {
     const pluginRegistry = sofieCore.getService("pluginRegistry");
