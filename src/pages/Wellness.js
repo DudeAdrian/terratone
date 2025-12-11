@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import sofieCore from "../core/SofieCore";
 import { GlassSection, GlassCard, GlassGrid } from "../theme/GlassmorphismTheme";
+import { useCommunityData } from "../hooks/useApi";
 
 const Wellness = () => {
   const [programs, setPrograms] = useState([]);
@@ -9,16 +10,112 @@ const Wellness = () => {
   const [resources, setResources] = useState([]);
   const [stats, setStats] = useState({});
   const [activeTab, setActiveTab] = useState("programs");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const communityData = useCommunityData("default");
 
   useEffect(() => {
     const wellnessService = sofieCore.getService("wellness");
     if (wellnessService) {
-      setPrograms(wellnessService.getWellnessPrograms());
-      setEvents(wellnessService.getCommunityEvents());
-      setResources(wellnessService.getWellnessResources());
-      setStats(wellnessService.getWellnessStats());
+      setPrograms(wellnessService.getWellnessPrograms() || []);
+      setEvents(wellnessService.getCommunityEvents() || []);
+      setResources(wellnessService.getWellnessResources() || []);
+      setStats(wellnessService.getWellnessStats() || {});
     }
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    try {
+      const wellnessPayload = communityData.wellness?.data;
+      const resourcesPayload = communityData.resources?.data;
+      const eventsPayload = communityData.events?.data;
+
+      const apiPrograms = Array.isArray(wellnessPayload?.programs)
+        ? wellnessPayload.programs
+        : Array.isArray(wellnessPayload)
+          ? wellnessPayload
+          : [];
+
+      const apiEvents = Array.isArray(wellnessPayload?.events)
+        ? wellnessPayload.events
+        : Array.isArray(eventsPayload)
+          ? eventsPayload
+          : Array.isArray(eventsPayload?.events)
+            ? eventsPayload.events
+            : [];
+
+      const apiResources = Array.isArray(wellnessPayload?.resources)
+        ? wellnessPayload.resources
+        : Array.isArray(resourcesPayload?.resources)
+          ? resourcesPayload.resources
+          : Array.isArray(resourcesPayload)
+            ? resourcesPayload
+            : [];
+
+      if (apiPrograms.length || apiEvents.length || apiResources.length) {
+        setPrograms(apiPrograms.length ? apiPrograms : programs);
+        setEvents(apiEvents.length ? apiEvents : events);
+        setResources(apiResources.length ? apiResources : resources);
+
+        const apiStats = wellnessPayload?.stats || resourcesPayload?.stats || {};
+        const derivedStats = {
+          activePrograms: apiStats.activePrograms || apiPrograms.length || stats.activePrograms,
+          totalParticipants: apiStats.totalParticipants || stats.totalParticipants,
+          upcomingEvents: apiStats.upcomingEvents || apiEvents.length || stats.upcomingEvents,
+          wellnessScore: apiStats.wellnessScore || stats.wellnessScore,
+        };
+        setStats({ ...stats, ...derivedStats });
+        setError(null);
+      }
+
+      if (communityData.wellness?.error || communityData.resources?.error || communityData.events?.error) {
+        setError(
+          communityData.wellness?.error?.message ||
+          communityData.resources?.error?.message ||
+          communityData.events?.error?.message ||
+          "Failed to load wellness data"
+        );
+      }
+
+      setLoading(communityData.isLoading);
+    } catch (err) {
+      console.error("Error loading wellness data:", err);
+      setError(err.message);
+      setLoading(false);
+    }
+  }, [communityData.wellness?.data, communityData.resources?.data, communityData.events?.data, communityData.isLoading, communityData.wellness?.error, communityData.resources?.error, communityData.events?.error]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-green-50 dark:from-gray-950 dark:via-gray-900 dark:to-emerald-950 flex items-center justify-center">
+        <GlassCard colors={{ primary: "emerald", secondary: "green" }}>
+          <div className="p-8 text-gray-700 dark:text-gray-300 flex items-center">
+            <div className="animate-spin inline-block w-6 h-6 border-3 border-emerald-500 border-t-transparent rounded-full mr-3"></div>
+            Loading wellness data...
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-green-50 dark:from-gray-950 dark:via-gray-900 dark:to-emerald-950 flex items-center justify-center p-4">
+        <GlassCard colors={{ primary: "red", secondary: "emerald" }}>
+          <div className="p-8">
+            <p className="text-red-600 dark:text-red-400 mb-4">Error: {error}</p>
+            <button
+              onClick={() => communityData.wellness?.refetch?.() || communityData.events?.refetch?.() || communityData.resources?.refetch?.() || window.location.reload()}
+              className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition"
+            >
+              Retry
+            </button>
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-green-50 dark:from-gray-950 dark:via-gray-900 dark:to-emerald-950 p-4 md:p-8">

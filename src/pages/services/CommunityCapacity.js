@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import sofieCore from "../../core/SofieCore";
+import { useCommunityData } from "../../hooks/useApi";
 
 const CommunityCapacity = () => {
   const [capacityService, setCapacityService] = useState(null);
@@ -10,6 +11,9 @@ const CommunityCapacity = () => {
   const [utilization, setUtilization] = useState(null);
   const [alerts, setAlerts] = useState([]);
   const [selectedTab, setSelectedTab] = useState("overview");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const communityData = useCommunityData("default");
 
   useEffect(() => {
     const service = sofieCore.getService("communityCapacity");
@@ -21,12 +25,62 @@ const CommunityCapacity = () => {
       setUtilization(service.getOverallUtilization());
       setAlerts(service.getCapacityAlerts());
     }
+    setLoading(false);
   }, []);
 
-  if (!capacityService || !metrics || !systemHealth) {
+  useEffect(() => {
+    try {
+      const apiCapacity = communityData.resources?.data?.capacityMetrics || communityData.resources?.data?.capacity || null;
+      const apiHealth = communityData.resources?.data?.systemHealth;
+      const apiUtilization = communityData.resources?.data?.utilization;
+      const apiAlerts = communityData.resources?.data?.alerts;
+
+      if (apiCapacity && apiHealth) {
+        setMetrics(apiCapacity);
+        setSystemHealth(apiHealth);
+        setUtilization(apiUtilization || apiCapacity.utilization || {});
+        setAlerts(Array.isArray(apiAlerts) ? apiAlerts : alerts);
+        setError(null);
+      }
+
+      if (communityData.resources?.error) {
+        setError(communityData.resources.error.message || "Failed to load community capacity data");
+      }
+
+      setLoading(communityData.isLoading);
+    } catch (err) {
+      console.error("Error loading community capacity data:", err);
+      setError(err.message);
+      setLoading(false);
+    }
+  }, [communityData.resources?.data, communityData.resources?.error, communityData.isLoading]);
+
+  if (loading) {
     return (
       <div className="text-center py-12">
         <p className="text-gray-500">Loading community capacity data...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-600">Error: {error}</p>
+        <button
+          onClick={() => communityData.resources?.refetch?.() || window.location.reload()}
+          className="mt-4 px-4 py-2 bg-emerald-600 text-white rounded-lg"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (!metrics || !systemHealth) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500">No community capacity data available</p>
       </div>
     );
   }
@@ -47,7 +101,9 @@ const CommunityCapacity = () => {
     }
   };
 
-  const populationPercent = Math.round((metrics.population.current / metrics.population.capacity) * 100);
+  const populationCurrent = metrics.population?.current || 0;
+  const populationCapacity = metrics.population?.capacity || 1;
+  const populationPercent = Math.min(100, Math.round((populationCurrent / populationCapacity) * 100));
 
   return (
     <div className="space-y-6">

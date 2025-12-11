@@ -4,6 +4,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../../core/SofieCore";
 import { GlassSection, GlassCard, GlassGrid } from "../../theme/GlassmorphismTheme";
 import { createBackHandler } from "../../utils/navigation";
+import { useFoodData } from "../../hooks/useApi";
 
 export default function FoodSafety() {
   const navigate = useNavigate();
@@ -12,6 +13,8 @@ export default function FoodSafety() {
   const handleBack = createBackHandler(navigate, location);
   const [safetyRecords, setSafetyRecords] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const foodData = useFoodData("default");
 
   useEffect(() => {
     try {
@@ -27,11 +30,62 @@ export default function FoodSafety() {
     }
   }, []);
 
+  useEffect(() => {
+    const load = () => {
+      try {
+        if (foodData.pests?.data) {
+          const mapped = Array.isArray(foodData.pests.data)
+            ? foodData.pests.data
+            : foodData.pests.data?.inspections || [];
+          setSafetyRecords(mapped);
+          setError(null);
+        } else if (!foodData.isLoading) {
+          const foodService = sofieCore.getService("food");
+          if (foodService?.getSafetyRecords) {
+            setSafetyRecords(foodService.getSafetyRecords());
+          }
+        }
+
+        setLoading(foodData.isLoading);
+        if (foodData.pests?.error) {
+          setError(foodData.pests.error.message || "Failed to load safety data");
+        }
+      } catch (err) {
+        console.error("Error loading food safety data:", err);
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, [foodData.pests?.data, foodData.isLoading, foodData.pests?.error]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
         <GlassCard colors={{ primary: "amber", secondary: "orange" }}>
-          <div className="p-8 text-gray-700 dark:text-gray-300">Loading safety records...</div>
+          <div className="p-8 text-gray-700 dark:text-gray-300">
+            <div className="animate-spin inline-block w-6 h-6 border-3 border-amber-500 border-t-transparent rounded-full mr-3"></div>
+            Loading safety records...
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center p-4">
+        <GlassCard colors={{ primary: "red", secondary: "amber" }}>
+          <div className="p-8">
+            <p className="text-red-600 dark:text-red-400 mb-4">Error: {error}</p>
+            <button
+              onClick={() => foodData.pests?.refetch?.() || window.location.reload()}
+              className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition"
+            >
+              Retry
+            </button>
+          </div>
         </GlassCard>
       </div>
     );
@@ -42,7 +96,7 @@ export default function FoodSafety() {
   };
 
   const passedTests = safetyRecords.filter((r) => r.result === "PASS").length;
-  const overallScore = Math.round((passedTests / safetyRecords.length) * 100);
+  const overallScore = safetyRecords.length > 0 ? Math.round((passedTests / safetyRecords.length) * 100) : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 p-4 md:p-8">
@@ -109,7 +163,6 @@ export default function FoodSafety() {
           </GlassCard>
         </GlassGrid>
 
-        {/* Safety Records Timeline */}
         <GlassSection colors={{ primary: "amber", secondary: "orange" }} elevation="standard">
           <div className="p-8">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Safety Test Records</h2>
@@ -158,7 +211,7 @@ export default function FoodSafety() {
                     <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mb-3">
                       <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Test Parameters</p>
                       <div className="space-y-2 text-sm">
-                        {record.parameters.map((param, idx) => (
+                         {(record.parameters || []).map((param, idx) => (
                           <div key={idx} className="flex justify-between text-gray-600 dark:text-gray-400">
                             <span>{param.name}:</span>
                             <span className={param.status === "PASS" ? "text-green-600 dark:text-green-400 font-bold" : "text-orange-600 dark:text-orange-400 font-bold"}>

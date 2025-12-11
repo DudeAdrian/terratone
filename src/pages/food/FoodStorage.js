@@ -4,6 +4,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../../core/SofieCore";
 import { GlassSection, GlassCard, GlassGrid } from "../../theme/GlassmorphismTheme";
 import { createBackHandler } from "../../utils/navigation";
+import { useFoodData } from "../../hooks/useApi";
 
 export default function FoodStorage() {
   const navigate = useNavigate();
@@ -12,26 +13,66 @@ export default function FoodStorage() {
   const handleBack = createBackHandler(navigate, location);
   const [storageInventory, setStorageInventory] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const foodData = useFoodData("default");
 
   useEffect(() => {
-    try {
-      const foodService = sofieCore.getService("food");
-      if (foodService && foodService.getStorageInventory) {
-        const data = foodService.getStorageInventory();
-        setStorageInventory(data);
+    const loadData = () => {
+      try {
+        if (foodData.storage.data) {
+          const payload = foodData.storage.data;
+          const data = Array.isArray(payload)
+            ? { locations: payload, totalCapacity: payload.reduce((s, l) => s + (l?.capacity || 0), 0) }
+            : payload;
+          setStorageInventory(data);
+          setError(null);
+        } else if (!foodData.isLoading) {
+          const foodService = sofieCore.getService("food");
+          if (foodService?.getStorageInventory) {
+            setStorageInventory(foodService.getStorageInventory());
+          }
+        }
+
+        setLoading(foodData.isLoading);
+
+        if (foodData.storage.error) {
+          setError(foodData.storage.error.message || "Failed to load storage data");
+        }
+      } catch (err) {
+        console.error("Error loading storage data:", err);
+        setError(err.message);
+        setLoading(false);
       }
-      setLoading(false);
-    } catch (error) {
-      console.error("Error loading storage data:", error);
-      setLoading(false);
-    }
-  }, []);
+    };
+
+    loadData();
+  }, [foodData.storage.data, foodData.isLoading, foodData.storage.error]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
         <GlassCard colors={{ primary: "amber", secondary: "orange" }}>
-          <div className="p-8 text-gray-700 dark:text-gray-300">Loading storage data...</div>
+          <div className="p-8 text-gray-700 dark:text-gray-300">
+            <div className="animate-spin inline-block w-6 h-6 border-3 border-amber-500 border-t-transparent rounded-full mr-3"></div>
+            Loading storage data...
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center p-4">
+        <GlassCard colors={{ primary: "red", secondary: "orange" }}>
+          <div className="p-8">
+            <p className="text-red-600 dark:text-red-400 mb-4">Error: {error}</p>
+            <button
+              onClick={() => foodData.storage.refetch?.() || window.location.reload()}
+              className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition"
+            >
+              Retry
+            </button>
+          </div>
         </GlassCard>
       </div>
     );
@@ -60,8 +101,9 @@ export default function FoodStorage() {
     return "#ef4444";
   };
 
-  const totalUsed = storageInventory.locations.reduce((sum, loc) => sum + loc.currentWeight, 0);
-  const totalCapacity = storageInventory.totalCapacity;
+  const locations = storageInventory.locations || [];
+  const totalUsed = locations.reduce((sum, loc) => sum + (loc?.currentWeight || 0), 0);
+  const totalCapacity = storageInventory.totalCapacity || locations.reduce((s, l) => s + (l?.capacity || 0), 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 p-4 md:p-8">
@@ -87,7 +129,7 @@ export default function FoodStorage() {
           <GlassCard colors={{ primary: "amber", secondary: "orange" }}>
             <div className="p-6 text-center">
               <p className="text-4xl font-bold text-green-600 dark:text-green-400">
-                {(totalUsed / storageInventory.locations.length).toFixed(1)}kg
+                {(totalUsed / (locations.length || 1)).toFixed(1)}kg
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Per Location Avg</p>
             </div>
@@ -115,7 +157,7 @@ export default function FoodStorage() {
           <div className="p-8">
             <h2 className="text-2xl font-bold mb-6 text-amber-600 dark:text-amber-400">Storage Locations</h2>
             <GlassGrid cols={2} colsMd={1} gap={6}>
-              {storageInventory.locations.map((location) => (
+              {locations.map((location) => (
                 <GlassCard key={location.locationId} colors={{ primary: "amber", secondary: "orange" }}>
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -128,7 +170,7 @@ export default function FoodStorage() {
                       <div className="flex justify-between text-sm mb-2">
                         <span className="text-gray-600 dark:text-gray-400">Temperature</span>
                         <span className="font-bold" style={{ color: getTemperatureColor(location.temperature) }}>
-                          {location.temperature}°C
+                          {location.temperature ?? "--"}°C
                         </span>
                       </div>
                     </div>
@@ -137,14 +179,14 @@ export default function FoodStorage() {
                     <div className="mb-4">
                       <div className="flex justify-between text-sm mb-2">
                         <span className="text-gray-600 dark:text-gray-400">Storage</span>
-                        <span className="font-bold text-gray-900 dark:text-white">{location.currentWeight}kg / {location.capacity}kg</span>
+                        <span className="font-bold text-gray-900 dark:text-white">{location.currentWeight ?? 0}kg / {location.capacity ?? 0}kg</span>
                       </div>
                       <div className="w-full bg-gray-300 dark:bg-gray-700 rounded-full h-3">
                         <div
                           className="h-3 rounded-full transition-all"
                           style={{
-                            width: `${Math.min((location.currentWeight / location.capacity) * 100, 100)}%`,
-                            backgroundColor: getStorageStatusColor(location.currentWeight, location.capacity)
+                            width: `${Math.min(((location.currentWeight || 0) / (location.capacity || 1)) * 100, 100)}%`,
+                            backgroundColor: getStorageStatusColor(location.currentWeight || 0, location.capacity || 1)
                           }}
                         />
                       </div>
@@ -154,7 +196,7 @@ export default function FoodStorage() {
                     <div className="border-t border-amber-200 dark:border-amber-400/20 pt-3">
                       <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Stored Items</p>
                       <div className="flex flex-wrap gap-2">
-                        {location.itemsStored.map((item) => (
+                        {(location.itemsStored || []).map((item) => (
                           <span
                             key={item}
                             className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400"
@@ -167,8 +209,8 @@ export default function FoodStorage() {
 
                     {/* Health Status */}
                     <div className="mt-3 flex justify-between text-xs text-gray-600 dark:text-gray-400 border-t border-amber-200 dark:border-amber-400/20 pt-3">
-                      <span>Health: <span className="text-green-600 dark:text-green-400 font-semibold">{location.healthStatus}</span></span>
-                      <span>Humidity: {location.humidity}%</span>
+                      <span>Health: <span className="text-green-600 dark:text-green-400 font-semibold">{location.healthStatus || "Healthy"}</span></span>
+                      <span>Humidity: {location.humidity ?? 0}%</span>
                     </div>
                   </div>
                 </GlassCard>
@@ -192,7 +234,7 @@ export default function FoodStorage() {
               </div>
               <div className="text-center">
                 <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-                  {(totalUsed / storageInventory.locations.length).toFixed(1)}kg
+                  {(totalUsed / (locations.length || 1)).toFixed(1)}kg
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Per Location Avg</p>
               </div>

@@ -1,23 +1,16 @@
 import React, { useState, useEffect } from "react";
 import sofieCore from "../core/SofieCore";
 import { GlassSection, GlassCard, GlassGrid } from "../theme/GlassmorphismTheme";
+import { useCommunityData } from "../hooks/useApi";
 
 const Marketplace = () => {
   const [listings, setListings] = useState([]);
   const [stats, setStats] = useState({});
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [activeTab, setActiveTab] = useState("listings");
-
-  useEffect(() => {
-    const marketplaceService = sofieCore.getService("marketplace");
-    if (marketplaceService) {
-      setListings(marketplaceService.getListings?.() || mockListings);
-      setStats(marketplaceService.getStats?.() || mockStats);
-    } else {
-      setListings(mockListings);
-      setStats(mockStats);
-    }
-  }, []);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const communityData = useCommunityData("default");
 
   const mockStats = {
     totalListings: 127,
@@ -32,6 +25,100 @@ const Marketplace = () => {
     { id: 3, title: "Carpentry Services", category: "skills", quantity: 1, unit: "project", description: "Raised beds, compost bins, storage", status: "available", provider: "BuildTech" }
   ];
 
+  useEffect(() => {
+    const marketplaceService = sofieCore.getService("marketplace");
+    if (marketplaceService) {
+      setListings(marketplaceService.getListings?.() || mockListings);
+      setStats(marketplaceService.getStats?.() || mockStats);
+    } else {
+      setListings(mockListings);
+      setStats(mockStats);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    try {
+      const apiResourcesRaw = communityData.resources?.data;
+      const apiSkillsRaw = communityData.skills?.data;
+      const apiEvents = communityData.events?.data;
+
+      const resourceListings = Array.isArray(apiResourcesRaw?.resources)
+        ? apiResourcesRaw.resources
+        : Array.isArray(apiResourcesRaw)
+          ? apiResourcesRaw
+          : [];
+
+      const skillListings = Array.isArray(apiSkillsRaw?.skills)
+        ? apiSkillsRaw.skills
+        : Array.isArray(apiSkillsRaw)
+          ? apiSkillsRaw
+          : [];
+
+      const mappedResources = resourceListings.map((res, idx) => ({
+        id: res.id || res.resourceId || `resource-${idx}`,
+        title: res.name || res.title || "Community Resource",
+        category: (res.type || "materials").toLowerCase(),
+        quantity: typeof res.available === "number" ? res.available : 1,
+        unit: res.unit || res.measure || "units",
+        description: res.description || "Shared community resource",
+        status: res.available === false ? "unavailable" : "available",
+        provider: res.owner || res.provider || "Community"
+      }));
+
+      const mappedSkills = skillListings.map((skill, idx) => ({
+        id: skill.id || skill.skillId || `skill-${idx}`,
+        title: skill.name || skill.skill || "Skill Offer",
+        category: "skills",
+        quantity: 1,
+        unit: skill.proficiency || "skill",
+        description: skill.description || skill.details || "Community skill offering",
+        status: "available",
+        provider: skill.provider || skill.userId || skill.offeredBy || "Community Member"
+      }));
+
+      const combined = [...mappedResources, ...mappedSkills];
+
+      if (combined.length > 0) {
+        const activeListings = combined.filter(l => l.status !== "unavailable" && l.status !== "inactive");
+        const totalItemsTraded = combined.reduce((sum, l) => sum + (Number(l.quantity) || 0), 0);
+        const baseStats = Object.keys(stats || {}).length > 0 ? stats : mockStats;
+
+        setListings(combined);
+        setStats({
+          totalListings: combined.length,
+          activeListings: activeListings.length,
+          totalTransactions: Array.isArray(apiEvents) ? apiEvents.length : baseStats.totalTransactions || 0,
+          totalItemsTraded: totalItemsTraded || baseStats.totalItemsTraded || 0
+        });
+        setError(null);
+      }
+
+      if (communityData.resources?.error || communityData.skills?.error || communityData.events?.error) {
+        setError(
+          communityData.resources?.error?.message ||
+          communityData.skills?.error?.message ||
+          communityData.events?.error?.message ||
+          "Failed to load marketplace data"
+        );
+      }
+
+      setLoading(communityData.isLoading);
+    } catch (err) {
+      console.error("Error loading marketplace data:", err);
+      setError(err.message);
+      setLoading(false);
+    }
+  }, [
+    communityData.resources?.data,
+    communityData.skills?.data,
+    communityData.events?.data,
+    communityData.isLoading,
+    communityData.resources?.error,
+    communityData.skills?.error,
+    communityData.events?.error
+  ]);
+
   const categories = ["all", "food", "energy", "tools", "skills", "materials"];
   const filteredListings = selectedCategory === "all" ? listings : listings.filter(l => l.category === selectedCategory);
 
@@ -45,6 +132,37 @@ const Marketplace = () => {
       default: return "📌";
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 dark:from-gray-950 dark:via-gray-900 dark:to-teal-950 flex items-center justify-center">
+        <GlassCard colors={{ primary: "teal", secondary: "cyan" }}>
+          <div className="p-8 text-gray-700 dark:text-gray-300 flex items-center">
+            <div className="animate-spin inline-block w-6 h-6 border-3 border-teal-500 border-t-transparent rounded-full mr-3"></div>
+            Loading marketplace data...
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 dark:from-gray-950 dark:via-gray-900 dark:to-teal-950 flex items-center justify-center p-4">
+        <GlassCard colors={{ primary: "red", secondary: "teal" }}>
+          <div className="p-8">
+            <p className="text-red-600 dark:text-red-400 mb-4">Error: {error}</p>
+            <button
+              onClick={() => communityData.resources?.refetch?.() || communityData.skills?.refetch?.() || communityData.events?.refetch?.() || window.location.reload()}
+              className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition"
+            >
+              Retry
+            </button>
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 dark:from-gray-950 dark:via-gray-900 dark:to-teal-950 p-4 md:p-8">

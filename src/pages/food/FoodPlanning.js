@@ -4,6 +4,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../../core/SofieCore";
 import { GlassSection, GlassCard, GlassGrid } from "../../theme/GlassmorphismTheme";
 import { createBackHandler } from "../../utils/navigation";
+import { useFoodData } from "../../hooks/useApi";
 
 export default function FoodPlanning() {
   const navigate = useNavigate();
@@ -12,6 +13,8 @@ export default function FoodPlanning() {
   const handleBack = createBackHandler(navigate, location);
   const [supplyPlanning, setSupplyPlanning] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const foodData = useFoodData("default");
 
   useEffect(() => {
     try {
@@ -26,12 +29,61 @@ export default function FoodPlanning() {
       setLoading(false);
     }
   }, []);
+  useEffect(() => {
+    const load = () => {
+      try {
+        if (foodData.crops.data) {
+          const plans = Array.isArray(foodData.crops.data)
+            ? { plans: foodData.crops.data }
+            : foodData.crops.data;
+          setSupplyPlanning(plans);
+          setError(null);
+        } else if (!foodData.isLoading) {
+          const foodService = sofieCore.getService("food");
+          if (foodService?.getCropPlans) {
+            setSupplyPlanning(foodService.getCropPlans());
+          }
+        }
+
+        setLoading(foodData.isLoading);
+        if (foodData.crops.error) {
+          setError(foodData.crops.error.message || "Failed to load crop plans");
+        }
+      } catch (err) {
+        console.error("Error loading planning data:", err);
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, [foodData.crops.data, foodData.isLoading, foodData.crops.error]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
         <GlassCard colors={{ primary: "amber", secondary: "orange" }}>
-          <div className="p-8 text-gray-700 dark:text-gray-300">Loading planning data...</div>
+          <div className="p-8 text-gray-700 dark:text-gray-300">
+            <div className="animate-spin inline-block w-6 h-6 border-3 border-emerald-500 border-t-transparent rounded-full mr-3"></div>
+            Loading planning data...
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center p-4">
+        <GlassCard colors={{ primary: "red", secondary: "emerald" }}>
+          <div className="p-8">
+            <p className="text-red-600 dark:text-red-400 mb-4">Error: {error}</p>
+            <button
+              onClick={() => foodData.crops.refetch?.() || window.location.reload()}
+              className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition"
+            >
+              Retry
+            </button>
+          </div>
         </GlassCard>
       </div>
     );
@@ -47,8 +99,9 @@ export default function FoodPlanning() {
     );
   }
 
-  const totalPlannedYield = (supplyPlanning?.upcomingHarvests || []).reduce(
-    (sum, harvest) => sum + (harvest.plannedYield || 0),
+  const upcomingHarvests = supplyPlanning?.upcomingHarvests || supplyPlanning?.plans || [];
+  const totalPlannedYield = upcomingHarvests.reduce(
+    (sum, harvest) => sum + (harvest.plannedYield || harvest.estimatedYield || 0),
     0
   );
 
@@ -84,7 +137,7 @@ export default function FoodPlanning() {
           <GlassCard colors={{ primary: "amber", secondary: "orange" }}>
             <div className="p-6 text-center">
               <p className="text-4xl font-bold text-blue-600 dark:text-blue-400">
-                {supplyPlanning.upcomingHarvests.length}
+                 {upcomingHarvests.length}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Upcoming Harvests</p>
             </div>
@@ -93,7 +146,7 @@ export default function FoodPlanning() {
           <GlassCard colors={{ primary: "amber", secondary: "orange" }}>
             <div className="p-6 text-center">
               <p className="text-4xl font-bold text-amber-600 dark:text-amber-400">
-                {supplyPlanning.storageCapacityUsed}%
+                 {supplyPlanning?.storageCapacityUsed ?? 0}%
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Storage Used</p>
             </div>
@@ -102,7 +155,7 @@ export default function FoodPlanning() {
           <GlassCard colors={{ primary: "amber", secondary: "orange" }}>
             <div className="p-6 text-center">
               <p className="text-4xl font-bold text-green-600 dark:text-green-400">
-                {supplyPlanning.projectedCapacityAfterHarvest}%
+                 {supplyPlanning?.projectedCapacityAfterHarvest ?? 0}%
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">After Harvest</p>
             </div>
@@ -114,7 +167,7 @@ export default function FoodPlanning() {
           <div className="p-8">
             <h2 className="text-2xl font-bold mb-6 text-amber-600 dark:text-amber-400">Upcoming Harvests</h2>
             <GlassGrid cols={2} colsMd={1} gap={6}>
-              {supplyPlanning.upcomingHarvests.map((harvest) => (
+              {upcomingHarvests.map((harvest) => (
                 <GlassCard key={harvest.cropId} colors={{ primary: "amber", secondary: "orange" }}>
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -135,13 +188,13 @@ export default function FoodPlanning() {
                       <div>
                         <div className="flex justify-between text-sm mb-2">
                           <span className="text-gray-600 dark:text-gray-400">Progress</span>
-                          <span className="font-bold text-gray-900 dark:text-white">{harvest.maturityPercentage}%</span>
+                          <span className="font-bold text-gray-900 dark:text-white">{harvest.maturityPercentage ?? 0}%</span>
                         </div>
                         <div className="w-full bg-gray-300 dark:bg-gray-700 rounded-full h-2">
                           <div
                             className="h-2 rounded-full transition-all"
                             style={{
-                              width: `${harvest.maturityPercentage}%`,
+                              width: `${harvest.maturityPercentage ?? 0}%`,
                               backgroundColor: '#f5a873'
                             }}
                           />
@@ -150,10 +203,10 @@ export default function FoodPlanning() {
 
                       <div className="border-t border-amber-200 dark:border-amber-400/20 pt-3">
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          <strong>Est. Yield:</strong> {harvest.estimatedYield} kg
+                          <strong>Est. Yield:</strong> {harvest.estimatedYield ?? harvest.plannedYield ?? 0} kg
                         </p>
                         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                          <strong>Location:</strong> {harvest.location}
+                          <strong>Location:</strong> {harvest.location || "N/A"}
                         </p>
                       </div>
                     </div>
@@ -175,13 +228,13 @@ export default function FoodPlanning() {
                 <div className="p-6">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Current Capacity Used</p>
                   <p className="text-4xl font-bold text-amber-600 dark:text-amber-400">
-                    {supplyPlanning.storageCapacityUsed}%
+                    {supplyPlanning?.storageCapacityUsed ?? 0}%
                   </p>
                   <div className="w-full bg-gray-300 dark:bg-gray-700 rounded-full h-3 mt-4">
                     <div
                       className="h-3 rounded-full transition-all"
                       style={{
-                        width: `${supplyPlanning.storageCapacityUsed}%`,
+                        width: `${supplyPlanning?.storageCapacityUsed ?? 0}%`,
                         backgroundColor: '#f5a873'
                       }}
                     />
@@ -192,13 +245,13 @@ export default function FoodPlanning() {
                 <div className="p-6">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Projected After Harvest</p>
                   <p className="text-4xl font-bold text-green-600 dark:text-green-400">
-                    {supplyPlanning.projectedCapacityAfterHarvest}%
+                    {supplyPlanning?.projectedCapacityAfterHarvest ?? 0}%
                   </p>
                   <div className="w-full bg-gray-300 dark:bg-gray-700 rounded-full h-3 mt-4">
                     <div
                       className="h-3 rounded-full transition-all"
                       style={{
-                        width: `${supplyPlanning.projectedCapacityAfterHarvest}%`,
+                        width: `${supplyPlanning?.projectedCapacityAfterHarvest ?? 0}%`,
                         backgroundColor: '#4ade80'
                       }}
                     />
@@ -214,7 +267,7 @@ export default function FoodPlanning() {
                   Projected Distribution
                 </h3>
                 <div className="space-y-3">
-                  {supplyPlanning.storageDistribution.map((item, idx) => (
+                  {(supplyPlanning.storageDistribution || []).map((item, idx) => (
                     <div key={idx} className="flex justify-between items-center">
                       <span className="text-gray-700 dark:text-gray-300 font-semibold">{item.location}</span>
                       <div className="flex items-center gap-3 flex-1 ml-4">

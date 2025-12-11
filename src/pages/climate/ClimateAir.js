@@ -4,6 +4,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../../core/SofieCore";
 import { GlassSection, GlassCard, GlassGrid } from "../../theme/GlassmorphismTheme";
 import { createBackHandler } from "../../utils/navigation";
+import { useClimateData } from "../../hooks/useApi";
 
 export default function ClimateAir() {
   const navigate = useNavigate();
@@ -12,26 +13,62 @@ export default function ClimateAir() {
   const handleBack = createBackHandler(navigate, location);
   const [airQuality, setAirQuality] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const climateData = useClimateData("default");
 
   useEffect(() => {
-    try {
-      const climateService = sofieCore.getService("climate");
-      if (climateService && climateService.getAirQuality) {
-        const data = climateService.getAirQuality();
-        setAirQuality(data);
+    const load = () => {
+      try {
+        if (climateData.monitoring?.data) {
+          setAirQuality(climateData.monitoring.data);
+          setError(null);
+        } else if (!climateData.isLoading) {
+          const climateService = sofieCore.getService("climate");
+          if (climateService?.getAirQuality) {
+            setAirQuality(climateService.getAirQuality());
+          }
+        }
+
+        setLoading(climateData.isLoading);
+        if (climateData.monitoring?.error) {
+          setError(climateData.monitoring.error.message || "Failed to load air quality data");
+        }
+      } catch (err) {
+        console.error("Error loading air quality data:", err);
+        setError(err.message);
+        setLoading(false);
       }
-      setLoading(false);
-    } catch (error) {
-      console.error("Error loading air quality data:", error);
-      setLoading(false);
-    }
-  }, []);
+    };
+
+    load();
+  }, [climateData.monitoring.data, climateData.isLoading, climateData.monitoring.error]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
         <GlassCard colors={{ primary: "emerald", secondary: "teal" }}>
-          <div className="p-8 text-gray-700 dark:text-gray-300">Loading air quality data...</div>
+          <div className="p-8 text-gray-700 dark:text-gray-300">
+            <div className="animate-spin inline-block w-6 h-6 border-3 border-emerald-500 border-t-transparent rounded-full mr-3"></div>
+            Loading air quality data...
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center p-4">
+        <GlassCard colors={{ primary: "red", secondary: "emerald" }}>
+          <div className="p-8">
+            <p className="text-red-600 dark:text-red-400 mb-4">Error: {error}</p>
+            <button
+              onClick={() => climateData.monitoring.refetch?.() || window.location.reload()}
+              className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition"
+            >
+              Retry
+            </button>
+          </div>
         </GlassCard>
       </div>
     );
@@ -101,10 +138,10 @@ export default function ClimateAir() {
             <div className="flex flex-col items-center justify-center min-h-[160px]">
               <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">Outdoor AQI</p>
               <p className="text-6xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent mb-2">
-                {airQuality.outdoor.aqi}
+                {airQuality.outdoor?.aqi ?? 0}
               </p>
               <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                {airQuality.outdoor.rating}
+                {airQuality.outdoor?.rating || 'Good'}
               </p>
             </div>
           </GlassCard>
@@ -112,10 +149,10 @@ export default function ClimateAir() {
             <div className="flex flex-col items-center justify-center min-h-[160px]">
               <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">Indoor Avg AQI</p>
               <p className="text-6xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent mb-2">
-                {Math.round(airQuality.indoor.reduce((sum, z) => sum + z.aqi, 0) / airQuality.indoor.length)}
+                {Math.round(((airQuality.indoor || []).reduce((sum, z) => sum + (z.aqi || 0), 0) / ((airQuality.indoor || []).length || 1)))}
               </p>
               <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                {airQuality.indoor.reduce((min, z) => z.aqi < min.aqi ? z : min).rating || 'Good'}
+                {(airQuality.indoor || []).reduce((min, z) => (z.aqi || 999) < (min.aqi || 999) ? z : min, {}).rating || 'Good'}
               </p>
             </div>
           </GlassCard>
@@ -131,28 +168,28 @@ export default function ClimateAir() {
               <GlassCard>
                 <div className="flex flex-col items-center justify-center min-h-[120px]">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">PM2.5</p>
-                  <p className="text-4xl font-bold text-gray-900 dark:text-white">{airQuality.outdoor.pm25}</p>
+                  <p className="text-4xl font-bold text-gray-900 dark:text-white">{airQuality.outdoor?.pm25 ?? 0}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">µg/m³</p>
                 </div>
               </GlassCard>
               <GlassCard>
                 <div className="flex flex-col items-center justify-center min-h-[120px]">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">PM10</p>
-                  <p className="text-4xl font-bold text-gray-900 dark:text-white">{airQuality.outdoor.pm10}</p>
+                  <p className="text-4xl font-bold text-gray-900 dark:text-white">{airQuality.outdoor?.pm10 ?? 0}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">µg/m³</p>
                 </div>
               </GlassCard>
               <GlassCard colors={{ primary: "blue", secondary: "sky" }}>
                 <div className="flex flex-col items-center justify-center min-h-[120px]">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Ozone</p>
-                  <p className="text-4xl font-bold text-blue-600 dark:text-blue-400">{airQuality.outdoor.o3}</p>
+                  <p className="text-4xl font-bold text-blue-600 dark:text-blue-400">{airQuality.outdoor?.o3 ?? 0}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">ppb</p>
                 </div>
               </GlassCard>
               <GlassCard>
                 <div className="flex flex-col items-center justify-center min-h-[120px]">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">NO₂</p>
-                  <p className="text-4xl font-bold text-gray-900 dark:text-white">{airQuality.outdoor.no2}</p>
+                  <p className="text-4xl font-bold text-gray-900 dark:text-white">{airQuality.outdoor?.no2 ?? 0}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">ppb</p>
                 </div>
               </GlassCard>
@@ -160,11 +197,11 @@ export default function ClimateAir() {
             <div className="mt-6 grid grid-cols-2 gap-4">
               <div className="bg-emerald-500/10 dark:bg-emerald-900/20 rounded-lg p-4">
                 <span className="text-gray-600 dark:text-gray-400">SO₂:</span>
-                <span className="text-gray-900 dark:text-white font-semibold ml-2">{airQuality.outdoor.so2} ppb</span>
+                <span className="text-gray-900 dark:text-white font-semibold ml-2">{airQuality.outdoor?.so2 ?? 0} ppb</span>
               </div>
               <div className="bg-emerald-500/10 dark:bg-emerald-900/20 rounded-lg p-4">
                 <span className="text-gray-600 dark:text-gray-400">CO:</span>
-                <span className="text-gray-900 dark:text-white font-semibold ml-2">{airQuality.outdoor.co} ppm</span>
+                <span className="text-gray-900 dark:text-white font-semibold ml-2">{airQuality.outdoor?.co ?? 0} ppm</span>
               </div>
             </div>
           </div>
@@ -177,7 +214,7 @@ export default function ClimateAir() {
               Indoor Air Quality by Zone
             </h2>
             <GlassGrid cols={1} colsMd={2} gap={6}>
-              {airQuality.indoor.map((zone) => (
+              {(airQuality.indoor || []).map((zone) => (
                 <GlassCard key={zone.location}>
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-4">

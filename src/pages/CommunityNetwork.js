@@ -1,33 +1,132 @@
 import React, { useState, useEffect } from "react";
 import sofieCore from "../core/SofieCore";
 import { GlassSection, GlassCard, GlassGrid } from "../theme/GlassmorphismTheme";
+import { useCommunityData } from "../hooks/useApi";
 
 const CommunityNetwork = () => {
   const [communities, setCommunities] = useState([]);
   const [stats, setStats] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("communities");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const communityData = useCommunityData("default");
 
   useEffect(() => {
     const networkService = sofieCore.getService("communityNetwork");
     if (networkService) {
       setCommunities(networkService.getCommunities?.() || mockCommunities);
       setStats(networkService.getNetworkStats?.() || { totalCommunities: 12, avgSustainabilityScore: 78, totalConnections: 45, totalCollaborations: 18 });
+      setLoading(false);
     } else {
       setCommunities(mockCommunities);
       setStats({ totalCommunities: 12, avgSustainabilityScore: 78, totalConnections: 45, totalCollaborations: 18 });
+      setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    try {
+      const apiResources = communityData.resources?.data;
+      const apiEvents = communityData.events?.data;
+      const apiSkills = communityData.skills?.data;
+
+      const communitiesFromResources = Array.isArray(apiResources?.communities)
+        ? apiResources.communities
+        : Array.isArray(apiResources)
+          ? apiResources
+          : [];
+
+      const communitiesFromEvents = Array.isArray(apiEvents)
+        ? apiEvents
+            .map((ev, idx) => ({
+              id: ev.communityId || ev.id || `event-${idx}`,
+              name: ev.communityName || ev.title || ev.name,
+              location: ev.location || "",
+              sustainabilityScore: ev.sustainabilityScore,
+              population: ev.attendance || ev.participants,
+              founded: ev.date?.slice(0, 4),
+              focusAreas: ev.focusAreas || ev.tags || [],
+            }))
+            .filter((c) => c.name)
+        : [];
+
+      const apiCommunities = communitiesFromResources.length > 0
+        ? communitiesFromResources
+        : communitiesFromEvents;
+
+      if (apiCommunities.length > 0) {
+        setCommunities(apiCommunities);
+        const totalCommunities = apiCommunities.length;
+        const avgSustainabilityScore = apiCommunities.reduce((sum, c) => sum + (c.sustainabilityScore || 0), 0) / totalCommunities || 0;
+        const totalConnections = Array.isArray(apiSkills) ? apiSkills.length : stats.totalConnections || 0;
+        const totalCollaborations = Array.isArray(apiEvents) ? apiEvents.length : stats.totalCollaborations || 0;
+        setStats({
+          totalCommunities,
+          avgSustainabilityScore,
+          totalConnections,
+          totalCollaborations,
+        });
+        setError(null);
+      }
+
+      if (communityData.resources?.error || communityData.events?.error || communityData.skills?.error) {
+        setError(
+          communityData.resources?.error?.message ||
+          communityData.events?.error?.message ||
+          communityData.skills?.error?.message ||
+          "Failed to load community data"
+        );
+      }
+
+      setLoading(communityData.isLoading);
+    } catch (err) {
+      console.error("Error loading community data:", err);
+      setError(err.message);
+      setLoading(false);
+    }
+  }, [communityData.resources?.data, communityData.events?.data, communityData.skills?.data, communityData.isLoading, communityData.resources?.error, communityData.events?.error, communityData.skills?.error]);
 
   const mockCommunities = [
     { id: 1, name: "Harmony Farm Collective", location: "Pacific Northwest", sustainabilityScore: 82, population: 48, founded: 2019, focusAreas: ["Food", "Energy", "Water"] },
     { id: 2, name: "Urban Green Initiative", location: "Portland, OR", sustainabilityScore: 75, population: 62, founded: 2020, focusAreas: ["Urban Farming", "Community"] }
   ];
 
-  const filteredCommunities = communities.filter(c =>
+  const filteredCommunities = (communities || []).filter(c =>
     c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.location?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-green-50 dark:from-gray-950 dark:via-gray-900 dark:to-teal-950 flex items-center justify-center">
+        <GlassCard colors={{ primary: "teal", secondary: "green" }}>
+          <div className="p-8 text-gray-700 dark:text-gray-300 flex items-center">
+            <div className="animate-spin inline-block w-6 h-6 border-3 border-teal-500 border-t-transparent rounded-full mr-3"></div>
+            Loading community data...
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-green-50 dark:from-gray-950 dark:via-gray-900 dark:to-teal-950 flex items-center justify-center p-4">
+        <GlassCard colors={{ primary: "red", secondary: "teal" }}>
+          <div className="p-8">
+            <p className="text-red-600 dark:text-red-400 mb-4">Error: {error}</p>
+            <button
+              onClick={() => communityData.resources?.refetch?.() || communityData.events?.refetch?.() || communityData.skills?.refetch?.() || window.location.reload()}
+              className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition"
+            >
+              Retry
+            </button>
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-green-50 dark:from-gray-950 dark:via-gray-900 dark:to-teal-950 p-4 md:p-8">

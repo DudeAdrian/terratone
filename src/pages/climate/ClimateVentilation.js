@@ -4,6 +4,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../../core/SofieCore";
 import { GlassSection, GlassCard, GlassGrid } from "../../theme/GlassmorphismTheme";
 import { createBackHandler } from "../../utils/navigation";
+import { useClimateData } from "../../hooks/useApi";
 
 export default function ClimateVentilation() {
   const navigate = useNavigate();
@@ -12,26 +13,62 @@ export default function ClimateVentilation() {
   const handleBack = createBackHandler(navigate, location);
   const [ventilation, setVentilation] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const climateData = useClimateData("default");
 
   useEffect(() => {
-    try {
-      const climateService = sofieCore.getService("climate");
-      if (climateService && climateService.getVentilationSystem) {
-        const data = climateService.getVentilationSystem();
-        setVentilation(data);
+    const load = () => {
+      try {
+        if (climateData.hvac?.data) {
+          setVentilation(climateData.hvac.data);
+          setError(null);
+        } else if (!climateData.isLoading) {
+          const climateService = sofieCore.getService("climate");
+          if (climateService?.getVentilationSystem) {
+            setVentilation(climateService.getVentilationSystem());
+          }
+        }
+
+        setLoading(climateData.isLoading);
+        if (climateData.hvac?.error) {
+          setError(climateData.hvac.error.message || "Failed to load ventilation data");
+        }
+      } catch (err) {
+        console.error("Error loading ventilation data:", err);
+        setError(err.message);
+        setLoading(false);
       }
-      setLoading(false);
-    } catch (error) {
-      console.error("Error loading ventilation data:", error);
-      setLoading(false);
-    }
-  }, []);
+    };
+
+    load();
+  }, [climateData.hvac.data, climateData.isLoading, climateData.hvac.error]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
         <GlassCard colors={{ primary: "emerald", secondary: "teal" }}>
-          <div className="p-8 text-gray-700 dark:text-gray-300">Loading ventilation data...</div>
+          <div className="p-8 text-gray-700 dark:text-gray-300">
+            <div className="animate-spin inline-block w-6 h-6 border-3 border-emerald-500 border-t-transparent rounded-full mr-3"></div>
+            Loading ventilation data...
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center p-4">
+        <GlassCard colors={{ primary: "red", secondary: "emerald" }}>
+          <div className="p-8">
+            <p className="text-red-600 dark:text-red-400 mb-4">Error: {error}</p>
+            <button
+              onClick={() => climateData.hvac.refetch?.() || window.location.reload()}
+              className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition"
+            >
+              Retry
+            </button>
+          </div>
         </GlassCard>
       </div>
     );
@@ -74,7 +111,7 @@ export default function ClimateVentilation() {
           <GlassCard colors={{ primary: "emerald", secondary: "teal" }}>
             <div className="p-6 text-center">
               <p className="text-4xl font-bold text-emerald-600 dark:text-emerald-400">
-                {ventilation.heatRecovery}%
+                {ventilation.heatRecovery ?? 0}%
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Heat Recovery</p>
             </div>
@@ -82,7 +119,7 @@ export default function ClimateVentilation() {
           <GlassCard colors={{ primary: "emerald", secondary: "teal" }}>
             <div className="p-6 text-center">
               <p className="text-4xl font-bold text-gray-900 dark:text-white">
-                {ventilation.filterStatus.length}
+                {ventilation.filterStatus?.length || 0}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Active Filters</p>
             </div>
@@ -90,7 +127,7 @@ export default function ClimateVentilation() {
           <GlassCard colors={{ primary: "emerald", secondary: "teal" }}>
             <div className="p-6 text-center">
               <p className="text-4xl font-bold text-green-600 dark:text-green-400">
-                {ventilation.fanSpeeds.filter(f => f.speed > 0).length}
+                {(ventilation.fanSpeeds || []).filter(f => f.speed > 0).length}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Zones Active</p>
             </div>
@@ -98,7 +135,7 @@ export default function ClimateVentilation() {
           <GlassCard colors={{ primary: "emerald", secondary: "teal" }}>
             <div className="p-6 text-center">
               <p className="text-4xl font-bold text-amber-600 dark:text-amber-400">
-                {Math.round(ventilation.fanSpeeds.reduce((sum, f) => sum + f.speed, 0) / ventilation.fanSpeeds.length)}%
+                {Math.round(((ventilation.fanSpeeds || []).reduce((sum, f) => sum + (f.speed || 0), 0) / ((ventilation.fanSpeeds || []).length || 1)))}%
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Avg Fan Speed</p>
             </div>
@@ -116,8 +153,8 @@ export default function ClimateVentilation() {
                 <p className="text-gray-600 dark:text-gray-400">Heat/cool recovery with fresh air exchange</p>
               </div>
               <div className="text-right">
-                <p className="text-5xl font-bold" style={{ color: getModeColor(ventilation.ervStatus.mode) }}>
-                  {ventilation.ervStatus.efficiency}%
+                <p className="text-5xl font-bold" style={{ color: getModeColor(ventilation.ervStatus?.mode) }}>
+                  {ventilation.ervStatus?.efficiency ?? 0}%
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Efficiency</p>
               </div>
@@ -128,7 +165,7 @@ export default function ClimateVentilation() {
                 <div className="p-4">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Supply Temperature</p>
                   <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-                    {ventilation.ervStatus.supplyTemp}°C
+                    {ventilation.ervStatus?.supplyTemp ?? 0}°C
                   </p>
                 </div>
               </GlassCard>
@@ -136,7 +173,7 @@ export default function ClimateVentilation() {
                 <div className="p-4">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Exhaust Temperature</p>
                   <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">
-                    {ventilation.ervStatus.exhaustTemp}°C
+                    {ventilation.ervStatus?.exhaustTemp ?? 0}°C
                   </p>
                 </div>
               </GlassCard>
@@ -145,14 +182,14 @@ export default function ClimateVentilation() {
             <div className="space-y-3">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-600 dark:text-gray-400">Mode:</span>
-                <span className="font-bold capitalize" style={{ color: getModeColor(ventilation.ervStatus.mode) }}>
-                  {ventilation.ervStatus.mode}
+                <span className="font-bold capitalize" style={{ color: getModeColor(ventilation.ervStatus?.mode) }}>
+                  {ventilation.ervStatus?.mode || "auto"}
                 </span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-600 dark:text-gray-400">Status:</span>
-                <span className="font-bold" style={{ color: ventilation.ervStatus.isRunning ? '#4ade80' : '#9ca3af' }}>
-                  {ventilation.ervStatus.isRunning ? '✓ Running' : '✕ Off'}
+                <span className="font-bold" style={{ color: ventilation.ervStatus?.isRunning ? '#4ade80' : '#9ca3af' }}>
+                  {ventilation.ervStatus?.isRunning ? '✓ Running' : '✕ Off'}
                 </span>
               </div>
             </div>
@@ -164,7 +201,7 @@ export default function ClimateVentilation() {
           <div className="p-8">
             <h2 className="text-2xl font-bold mb-6 text-emerald-600 dark:text-emerald-400">Filter Status</h2>
             <div className="space-y-4">
-              {ventilation.filterStatus.map((filter) => (
+              {(ventilation.filterStatus || []).map((filter) => (
                 <GlassCard key={filter.type} colors={{ primary: "emerald", secondary: "teal" }}>
                   <div className="p-4">
                     <div className="flex items-center justify-between mb-3">
@@ -194,7 +231,7 @@ export default function ClimateVentilation() {
           <div className="p-8">
             <h2 className="text-2xl font-bold mb-6 text-emerald-600 dark:text-emerald-400">Zone Fan Speeds</h2>
             <GlassGrid cols={2} colsMd={1} gap={4}>
-              {ventilation.fanSpeeds.map((fan) => (
+              {(ventilation.fanSpeeds || []).map((fan) => (
                 <GlassCard key={fan.zone} colors={{ primary: "emerald", secondary: "teal" }}>
                   <div className="p-4">
                     <div className="flex items-center justify-between mb-3">

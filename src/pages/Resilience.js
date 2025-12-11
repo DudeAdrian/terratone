@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../core/SofieCore";
-import { GlassSection, GlassCard, GlassGrid, GlassButton } from "../theme/GlassmorphismTheme";
+import { GlassSection, GlassCard, GlassGrid } from "../theme/GlassmorphismTheme";
 import { createBackHandler } from "../utils/navigation";
+import { useCommunityData } from "../hooks/useApi";
 
 const Resilience = () => {
   const navigate = useNavigate();
@@ -15,16 +16,128 @@ const Resilience = () => {
   const [risks, setRisks] = useState([]);
   const [resilienceScore, setResilienceScore] = useState(0);
   const [activeTab, setActiveTab] = useState("overview");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const communityData = useCommunityData("default");
+
+  const mockEmergencyPlans = [
+    { id: "plan-1", name: "Storm Response", description: "Checklist for severe weather and flooding", status: "active", lastReview: "2024-11-01" },
+    { id: "plan-2", name: "Backup Power", description: "Microgrid fallback and generator sharing", status: "active", lastReview: "2024-10-15" },
+    { id: "plan-3", name: "Medical Triage", description: "First-aid stations and medical stockpiles", status: "review", lastReview: "2024-09-20" }
+  ];
+
+  const mockResources = {
+    water: 92,
+    energy: 78,
+    food: 85,
+    medical: 68
+  };
+
+  const mockRisks = [
+    { id: "risk-1", type: "power", description: "Battery reserves below 30% for two microgrids", severity: "medium", probability: 0.45 },
+    { id: "risk-2", type: "fire", description: "Wildfire smoke risk in the next 72 hours", severity: "high", probability: 0.62 }
+  ];
+
+  const mockResilienceScore = 78;
 
   useEffect(() => {
     const resService = sofieCore.getService("resilience");
     if (resService) {
-      setEmergencyPlans(resService.getEmergencyPlans());
-      setResources(resService.getEmergencyResources());
-      setRisks(resService.assessRisks());
-      setResilienceScore(resService.getResilienceScore());
+      setEmergencyPlans(resService.getEmergencyPlans?.() || mockEmergencyPlans);
+      setResources(resService.getEmergencyResources?.() || mockResources);
+      setRisks(resService.assessRisks?.() || mockRisks);
+      setResilienceScore(resService.getResilienceScore?.() || mockResilienceScore);
+      setLoading(false);
+    } else {
+      setEmergencyPlans(mockEmergencyPlans);
+      setResources(mockResources);
+      setRisks(mockRisks);
+      setResilienceScore(mockResilienceScore);
+      setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    try {
+      const apiResourcesRaw = communityData.resources?.data;
+      const apiEvents = communityData.events?.data;
+
+      const resourceList = Array.isArray(apiResourcesRaw?.resources)
+        ? apiResourcesRaw.resources
+        : Array.isArray(apiResourcesRaw)
+          ? apiResourcesRaw
+          : [];
+
+      if (resourceList.length > 0) {
+        const aggregated = resourceList.reduce((acc, res) => {
+          const key = (res.type || "general").toLowerCase();
+          const quantity = typeof res.available === "number" ? res.available : 1;
+          acc[key] = (acc[key] || 0) + (Number.isFinite(quantity) ? quantity : 0);
+          return acc;
+        }, {});
+        setResources(aggregated);
+      }
+
+      const plansFromEvents = Array.isArray(apiEvents)
+        ? apiEvents
+            .map((ev, idx) => ({
+              id: ev.id || ev.eventId || `plan-${idx}`,
+              name: ev.title || ev.name || "Preparedness Drill",
+              description: ev.description || ev.summary || "Community preparedness event",
+              status: ev.status || ev.state || "active",
+              lastReview: ev.date ? new Date(ev.date).toLocaleDateString() : "Recent"
+            }))
+            .filter((plan) => plan.name)
+        : [];
+
+      if (plansFromEvents.length > 0) {
+        setEmergencyPlans(plansFromEvents);
+      }
+
+      if (resourceList.length > 0) {
+        const availableCount = resourceList.filter((res) => res.available !== false && (typeof res.available !== "number" || res.available > 0)).length;
+        const derivedScore = Math.min(100, Math.max(0, Math.round((availableCount / resourceList.length) * 100)));
+        setResilienceScore(derivedScore);
+      }
+
+      const resourceRisks = resourceList
+        .filter((res) => res.available === false || (typeof res.available === "number" && res.available < 25))
+        .map((res, idx) => ({
+          id: res.id || res.resourceId || `risk-${idx}`,
+          type: res.type || "resource",
+          description: res.description || "Resource availability risk",
+          severity: typeof res.available === "number" && res.available < 10 ? "high" : "medium",
+          probability: 0.55
+        }));
+
+      if (resourceRisks.length > 0) {
+        setRisks(resourceRisks);
+      }
+
+      if (communityData.resources?.error || communityData.events?.error || communityData.wellness?.error) {
+        setError(
+          communityData.resources?.error?.message ||
+          communityData.events?.error?.message ||
+          communityData.wellness?.error?.message ||
+          "Failed to load resilience data"
+        );
+      }
+
+      setLoading(communityData.isLoading);
+    } catch (err) {
+      console.error("Error loading resilience data:", err);
+      setError(err.message);
+      setLoading(false);
+    }
+  }, [
+    communityData.resources?.data,
+    communityData.events?.data,
+    communityData.wellness?.data,
+    communityData.isLoading,
+    communityData.resources?.error,
+    communityData.events?.error,
+    communityData.wellness?.error
+  ]);
 
   const getSeverityColor = (severity) => {
     switch (severity) {
@@ -38,6 +151,37 @@ const Resilience = () => {
         return { bg: "bg-gray-100/40 dark:bg-gray-700/40", border: "border-gray-300/50 dark:border-gray-700/50", text: "text-gray-700 dark:text-gray-300" };
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-rose-50 dark:from-gray-950 dark:via-gray-900 dark:to-red-950 flex items-center justify-center">
+        <GlassCard colors={{ primary: "red", secondary: "rose" }}>
+          <div className="p-8 text-gray-700 dark:text-gray-300 flex items-center">
+            <div className="animate-spin inline-block w-6 h-6 border-3 border-red-500 border-t-transparent rounded-full mr-3"></div>
+            Loading resilience data...
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-rose-50 dark:from-gray-950 dark:via-gray-900 dark:to-red-950 flex items-center justify-center p-4">
+        <GlassCard colors={{ primary: "red", secondary: "rose" }}>
+          <div className="p-8">
+            <p className="text-red-600 dark:text-red-400 mb-4">Error: {error}</p>
+            <button
+              onClick={() => communityData.resources?.refetch?.() || communityData.events?.refetch?.() || communityData.wellness?.refetch?.() || window.location.reload()}
+              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+            >
+              Retry
+            </button>
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-rose-50 dark:from-gray-950 dark:via-gray-900 dark:to-red-950 p-4 md:p-8">
@@ -242,25 +386,28 @@ const Resilience = () => {
           {activeTab === "resources" && (
             <div className="p-8">
               <GlassGrid cols={1} colsMd={2} gap={5}>
-                {Object.entries(resources).length > 0 ? Object.entries(resources).map(([resource, quantity], idx) => (
-                  <GlassCard key={resource} colors={{ primary: "red", secondary: "rose" }}>
-                    <div className="p-6">
-                      <div className="flex justify-between items-center mb-4">
-                        <h3 className="font-bold text-lg text-gray-900 dark:text-white capitalize">{resource.replace(/_/g, " ")}</h3>
-                        <span className="text-3xl font-bold text-red-600 dark:text-red-400">{quantity}</span>
+                {Object.entries(resources).length > 0 ? Object.entries(resources).map(([resource, quantity], idx) => {
+                  const normalized = Math.max(0, Math.min(100, Math.round(Number(quantity) || 0)));
+                  return (
+                    <GlassCard key={resource} colors={{ primary: "red", secondary: "rose" }}>
+                      <div className="p-6">
+                        <div className="flex justify-between items-center mb-4">
+                          <h3 className="font-bold text-lg text-gray-900 dark:text-white capitalize">{resource.replace(/_/g, " ")}</h3>
+                          <span className="text-3xl font-bold text-red-600 dark:text-red-400">{normalized}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                          <div 
+                            className="bg-gradient-to-r from-red-500 to-rose-500 h-3 rounded-full"
+                            style={{ width: `${normalized}%` }}
+                          ></div>
+                        </div>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-3">
+                          {normalized >= 75 ? "✓ Well-stocked" : normalized >= 50 ? "⚠ Monitor levels" : "🔴 Needs replenishment"}
+                        </p>
                       </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                        <div 
-                          className="bg-gradient-to-r from-red-500 to-rose-500 h-3 rounded-full"
-                          style={{ width: `${(quantity / 100) * 100}%` }}
-                        ></div>
-                      </div>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-3">
-                        {quantity >= 75 ? "✓ Well-stocked" : quantity >= 50 ? "⚠ Monitor levels" : "🔴 Needs replenishment"}
-                      </p>
-                    </div>
-                  </GlassCard>
-                )) : (
+                    </GlassCard>
+                  );
+                }) : (
                   <div className="text-center py-12 text-gray-600 dark:text-gray-400 md:col-span-2">
                     No resource data available
                   </div>
