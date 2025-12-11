@@ -4,6 +4,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../../core/SofieCore";
 import { GlassSection, GlassCard, GlassGrid } from "../../theme/GlassmorphismTheme";
 import { createBackHandler } from "../../utils/navigation";
+import { useEnergyData } from "../../hooks/useApi";
 
 export default function EnergySolar() {
   const navigate = useNavigate();
@@ -12,35 +13,75 @@ export default function EnergySolar() {
   const handleBack = createBackHandler(navigate, location);
   const [solarArrays, setSolarArrays] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Backend energy data (solar)
+  const energyData = useEnergyData("default");
 
   useEffect(() => {
-    try {
-      const energyService = sofieCore.getService("energy");
-      if (energyService && energyService.getSolarArrays) {
-        const arrays = energyService.getSolarArrays();
-        setSolarArrays(arrays);
+    const load = async () => {
+      try {
+        if (energyData.solar?.data) {
+          const arrays = Array.isArray(energyData.solar.data)
+            ? energyData.solar.data
+            : [energyData.solar.data];
+          setSolarArrays(arrays);
+          setError(null);
+        } else if (!energyData.isLoading) {
+          const energyService = sofieCore.getService("energy");
+          if (energyService?.getSolarArrays) {
+            setSolarArrays(energyService.getSolarArrays() || []);
+          }
+        }
+      } catch (err) {
+        console.error("Error loading solar data:", err);
+        setError(err.message);
+      } finally {
+        setLoading(energyData.isLoading);
       }
-      setLoading(false);
-    } catch (error) {
-      console.error("Error loading solar data:", error);
-      setLoading(false);
-    }
-  }, []);
+    };
+
+    load();
+  }, [energyData.solar?.data, energyData.isLoading]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
         <GlassCard colors={{ primary: "amber", secondary: "orange" }}>
-          <div className="p-8 text-gray-700 dark:text-gray-300">Loading solar data...</div>
+          <div className="p-8 text-gray-700 dark:text-gray-300">
+            <div className="animate-spin inline-block w-6 h-6 border-3 border-amber-500 border-t-transparent rounded-full mr-3"></div>
+            Loading solar data...
+          </div>
         </GlassCard>
       </div>
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center p-4">
+        <GlassCard colors={{ primary: "red", secondary: "orange" }}>
+          <div className="p-8">
+            <p className="text-red-600 dark:text-red-400 mb-4">Error: {error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition"
+            >
+              Retry
+            </button>
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
+
+  const arrayCount = solarArrays.length;
   const totalCapacity = solarArrays.reduce((sum, a) => sum + a.capacity, 0);
   const totalOutput = solarArrays.reduce((sum, a) => sum + a.currentOutput, 0);
   const totalProduction = solarArrays.reduce((sum, a) => sum + a.todayProduction, 0);
-  const avgEfficiency = Math.round(solarArrays.reduce((sum, a) => sum + a.efficiency, 0) / solarArrays.length);
+  const avgEfficiency = arrayCount > 0
+    ? Math.round(solarArrays.reduce((sum, a) => sum + a.efficiency, 0) / arrayCount)
+    : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 p-4 md:p-8">

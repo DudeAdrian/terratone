@@ -4,6 +4,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../../core/SofieCore";
 import { GlassSection, GlassCard, GlassGrid } from "../../theme/GlassmorphismTheme";
 import { createBackHandler } from "../../utils/navigation";
+import { useClimateData } from "../../hooks/useApi";
 
 export default function ClimateIndoor() {
   const navigate = useNavigate();
@@ -12,32 +13,70 @@ export default function ClimateIndoor() {
   const handleBack = createBackHandler(navigate, location);
   const [indoorClimate, setIndoorClimate] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Backend climate data
+  const climateData = useClimateData("default");
 
   useEffect(() => {
-    try {
-      const climateService = sofieCore.getService("climate");
-      if (climateService && climateService.getIndoorClimate) {
-        const data = climateService.getIndoorClimate();
-        setIndoorClimate(data);
+    const load = async () => {
+      try {
+        if (climateData.zones?.data) {
+          const zones = Array.isArray(climateData.zones.data)
+            ? climateData.zones.data
+            : [climateData.zones.data];
+          // Normalize to the structure used by UI
+          setIndoorClimate({ zones });
+          setError(null);
+        } else if (!climateData.isLoading) {
+          const climateService = sofieCore.getService("climate");
+          if (climateService?.getIndoorClimate) {
+            setIndoorClimate(climateService.getIndoorClimate() || null);
+          }
+        }
+      } catch (err) {
+        console.error("Error loading indoor climate data:", err);
+        setError(err.message);
+      } finally {
+        setLoading(climateData.isLoading);
       }
-      setLoading(false);
-    } catch (error) {
-      console.error("Error loading indoor climate data:", error);
-      setLoading(false);
-    }
-  }, []);
+    };
+
+    load();
+  }, [climateData.zones?.data, climateData.isLoading]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
         <GlassCard colors={{ primary: "emerald", secondary: "teal" }}>
-          <div className="p-8 text-gray-700 dark:text-gray-300">Loading indoor climate data...</div>
+          <div className="p-8 text-gray-700 dark:text-gray-300">
+            <div className="animate-spin inline-block w-6 h-6 border-3 border-emerald-500 border-t-transparent rounded-full mr-3"></div>
+            Loading indoor climate data...
+          </div>
         </GlassCard>
       </div>
     );
   }
 
-  if (!indoorClimate) {
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center p-4">
+        <GlassCard colors={{ primary: "red", secondary: "orange" }}>
+          <div className="p-8">
+            <p className="text-red-600 dark:text-red-400 mb-4">Error: {error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition"
+            >
+              Retry
+            </button>
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
+
+  if (!indoorClimate || !indoorClimate.zones?.length) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
         <GlassCard colors={{ primary: "emerald", secondary: "teal" }}>

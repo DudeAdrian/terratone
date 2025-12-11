@@ -4,6 +4,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../../core/SofieCore";
 import { GlassSection, GlassCard, GlassGrid } from "../../theme/GlassmorphismTheme";
 import { createBackHandler } from "../../utils/navigation";
+import { useWaterData } from "../../hooks/useApi";
 
 export default function WaterQuality() {
   const navigate = useNavigate();
@@ -12,20 +13,38 @@ export default function WaterQuality() {
   const handleBack = createBackHandler(navigate, location);
   const [qualityMetrics, setQualityMetrics] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Backend water data (quality)
+  const waterData = useWaterData("default");
 
   useEffect(() => {
-    try {
-      const waterService = sofieCore.getService("water");
-      if (waterService && waterService.getPotableQualityMetrics) {
-        const metrics = waterService.getPotableQualityMetrics();
-        setQualityMetrics(metrics);
+    const load = async () => {
+      try {
+        // Prefer backend data
+        if (waterData.quality?.data) {
+          const metrics = Array.isArray(waterData.quality.data)
+            ? waterData.quality.data
+            : [waterData.quality.data];
+          setQualityMetrics(metrics);
+          setError(null);
+        } else if (!waterData.isLoading) {
+          // Fallback to local mock if backend not available
+          const waterService = sofieCore.getService("water");
+          if (waterService?.getPotableQualityMetrics) {
+            setQualityMetrics(waterService.getPotableQualityMetrics() || []);
+          }
+        }
+      } catch (err) {
+        console.error("Error loading water quality data:", err);
+        setError(err.message);
+      } finally {
+        setLoading(waterData.isLoading);
       }
-      setLoading(false);
-    } catch (error) {
-      console.error("Error loading water quality data:", error);
-      setLoading(false);
-    }
-  }, []);
+    };
+
+    load();
+  }, [waterData.quality?.data, waterData.isLoading]);
 
   const getStatusColor = (status) => {
     return status === "pass" ? "#4ade80" : "#ef4444";
@@ -35,7 +54,28 @@ export default function WaterQuality() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center">
         <GlassCard colors={{ primary: "cyan", secondary: "blue" }}>
-          <div className="p-8 text-gray-700 dark:text-gray-300">Loading quality data...</div>
+          <div className="p-8 text-gray-700 dark:text-gray-300">
+            <div className="animate-spin inline-block w-6 h-6 border-3 border-cyan-500 border-t-transparent rounded-full mr-3"></div>
+            Loading quality data...
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-slate-950 flex items-center justify-center p-4">
+        <GlassCard colors={{ primary: "red", secondary: "orange" }}>
+          <div className="p-8">
+            <p className="text-red-600 dark:text-red-400 mb-4">Error: {error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition"
+            >
+              Retry
+            </button>
+          </div>
         </GlassCard>
       </div>
     );
