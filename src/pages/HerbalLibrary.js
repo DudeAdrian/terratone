@@ -1,7 +1,7 @@
 // src/pages/HerbalLibrary.js - Community herbal knowledge hub
 import React, { useEffect, useMemo, useState } from "react";
 import sofieCore from "../core/SofieCore";
-import { GlassSection, GlassCard, GlassGrid } from "../theme/GlassmorphismTheme";
+import { QuantumSection, QuantumCard, QuantumGlassGrid } from "../theme/QuantumGlassTheme";
 
 const HerbalLibrary = () => {
   const [herbalService, setHerbalService] = useState(null);
@@ -37,9 +37,9 @@ const HerbalLibrary = () => {
   };
 
   const herbGrid = (
-    <GlassGrid cols={1} colsMd={2} colsLg={3} gap={5}>
+    <QuantumGlassGrid columns={3} gap={6}>
       {herbs.map((herb) => (
-        <GlassCard key={herb.id} colors={{ primary: "green", secondary: "emerald" }} className="cursor-pointer" onClick={() => handleSelectHerb(herb.id)}>
+        <QuantumCard key={herb.id} chakra="heart" blurLevel="deep" opacityLevel="ultraClear" glow={true} edgeGlow={true} interactive={true} onClick={() => handleSelectHerb(herb.id)}>
           <div className="p-6 space-y-3">
             <div className="flex items-start justify-between">
               <div>
@@ -68,19 +68,19 @@ const HerbalLibrary = () => {
               {herb.safety?.pregnancy && <span className="px-2 py-1 rounded bg-green-500/10 text-green-700 dark:text-green-300">✓ Pregnancy-aware</span>}
             </div>
           </div>
-        </GlassCard>
+        </QuantumCard>
       ))}
 
       {herbs.length === 0 && (
-        <GlassCard colors={{ primary: "green", secondary: "emerald" }}>
-          <div className="p-10 text-center text-gray-600 dark:text-gray-400">No herbs match these filters yet.</div>
-        </GlassCard>
+        <QuantumCard chakra="heart" blurLevel="medium" opacityLevel="veil">
+          <div className="p-10 text-center text-white">No herbs match these filters yet.</div>
+        </QuantumCard>
       )}
-    </GlassGrid>
+    </QuantumGlassGrid>
   );
 
   const herbDetail = selectedHerb && (
-    <GlassCard colors={{ primary: "emerald", secondary: "green" }}>
+    <QuantumCard chakra="heart" blurLevel="deep" opacityLevel="ultraClear" glow={true}>
       <div className="p-8 space-y-4">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -98,9 +98,9 @@ const HerbalLibrary = () => {
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
-          <GlassCard colors={{ primary: "green", secondary: "emerald" }}>
+          <QuantumCard chakra="heart" blurLevel="medium" opacityLevel="veil">
             <div className="p-4 space-y-2">
-              <p className="text-sm text-gray-600 dark:text-gray-300">Community Uses</p>
+              <p className="text-sm text-emerald-200">Community Uses</p>
               <div className="flex flex-wrap gap-2">
                 {selectedHerb.communityUses.map((use) => (
                   <span key={use} className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-200 text-xs font-semibold">
@@ -108,46 +108,46 @@ const HerbalLibrary = () => {
                   </span>
                 ))}
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-300">Energetics: {selectedHerb.energetics}</p>
+              <p className="text-sm text-emerald-200">Energetics: {selectedHerb.energetics}</p>
             </div>
-          </GlassCard>
+          </QuantumCard>
 
-          <GlassCard colors={{ primary: "yellow", secondary: "amber" }}>
+          <QuantumCard chakra="solar" blurLevel="medium" opacityLevel="veil">
             <div className="p-4 space-y-2">
-              <p className="text-sm text-gray-700 dark:text-gray-200 font-semibold">Preparation</p>
-              <p className="text-sm text-gray-700 dark:text-gray-300">{selectedHerb.preparation.join(", ")}</p>
-              <p className="text-sm text-gray-700 dark:text-gray-300">Origin: {selectedHerb.origin}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Safety: {selectedHerb.safety?.notes}</p>
+              <p className="text-sm text-yellow-200 font-semibold">Preparation</p>
+              <p className="text-sm text-gray-100">{selectedHerb.preparation.join(", ")}</p>
+              <p className="text-sm text-gray-100">Origin: {selectedHerb.origin}</p>
+              <p className="text-xs text-gray-300">Safety: {selectedHerb.safety?.notes}</p>
             </div>
-          </GlassCard>
+          </QuantumCard>
         </div>
       </div>
-    </GlassCard>
+    </QuantumCard>
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-amber-50 dark:from-gray-950 dark:via-gray-900 dark:to-emerald-950 p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-gray-900 to-teal-950 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <GlassSection colors={{ primary: "emerald", secondary: "green" }} elevation="high">
+        <QuantumSection chakra="heart">
           <div className="py-10 px-6">
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-emerald-600 to-amber-500 bg-clip-text text-transparent">🌿 Community Herbal Library</h1>
-            <p className="text-lg text-emerald-700 dark:text-emerald-200 max-w-3xl mt-3">
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-emerald-300 to-green-400 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(0,255,136,0.5)]">🌿 Community Herbal Library</h1>
+            <p className="text-lg text-emerald-200 max-w-3xl mt-3">
               Indigenous herbal knowledge for community resilience, wellness, and shared stewardship.
             </p>
           </div>
-        </GlassSection>
+        </QuantumSection>
 
         {/* Stats */}
-        <GlassGrid cols={2} colsMd={4} gap={5}>
-          <GlassCard colors={{ primary: "emerald", secondary: "green" }}><div className="p-6 text-center"><div className="text-sm text-gray-600 dark:text-gray-300 mb-1">Herbs</div><div className="text-4xl font-bold text-emerald-600 dark:text-emerald-300">{stats.totalHerbs}</div></div></GlassCard>
-          <GlassCard colors={{ primary: "amber", secondary: "yellow" }}><div className="p-6 text-center"><div className="text-sm text-gray-600 dark:text-gray-300 mb-1">Traditions</div><div className="text-4xl font-bold text-amber-600 dark:text-amber-300">{stats.traditions}</div></div></GlassCard>
-          <GlassCard colors={{ primary: "green", secondary: "emerald" }}><div className="p-6 text-center"><div className="text-sm text-gray-600 dark:text-gray-300 mb-1">Pregnancy-aware</div><div className="text-4xl font-bold text-green-600 dark:text-green-300">{stats.pregnancySafeCount}</div></div></GlassCard>
-          <GlassCard colors={{ primary: "cyan", secondary: "blue" }}><div className="p-6 text-center"><div className="text-sm text-gray-600 dark:text-gray-300 mb-1">Resilience focus</div><div className="text-4xl font-bold text-cyan-600 dark:text-cyan-300">{stats.resilienceFocus}</div></div></GlassCard>
-        </GlassGrid>
+        <QuantumGlassGrid columns={4} gap={5}>
+          <QuantumCard chakra="heart" blurLevel="medium" opacityLevel="veil"><div className="p-6 text-center"><div className="text-sm text-emerald-200 mb-1">Herbs</div><div className="text-4xl font-bold text-white">{stats.totalHerbs}</div></div></QuantumCard>
+          <QuantumCard chakra="solar" blurLevel="medium" opacityLevel="veil"><div className="p-6 text-center"><div className="text-sm text-yellow-200 mb-1">Traditions</div><div className="text-4xl font-bold text-white">{stats.traditions}</div></div></QuantumCard>
+          <QuantumCard chakra="heart" blurLevel="medium" opacityLevel="veil"><div className="p-6 text-center"><div className="text-sm text-emerald-200 mb-1">Pregnancy-aware</div><div className="text-4xl font-bold text-white">{stats.pregnancySafeCount}</div></div></QuantumCard>
+          <QuantumCard chakra="throat" blurLevel="medium" opacityLevel="veil"><div className="p-6 text-center"><div className="text-sm text-cyan-200 mb-1">Resilience focus</div><div className="text-4xl font-bold text-white">{stats.resilienceFocus}</div></div></QuantumCard>
+        </QuantumGlassGrid>
 
         {/* Filters */}
-        <GlassCard colors={{ primary: "emerald", secondary: "green" }}>
+        <QuantumCard chakra="heart" blurLevel="deep" opacityLevel="ultraClear">
           <div className="p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
             <input
               type="text"
@@ -186,7 +186,7 @@ const HerbalLibrary = () => {
               Pregnancy-aware only
             </label>
           </div>
-        </GlassCard>
+        </QuantumCard>
 
         {/* Content */}
         {selectedHerb ? herbDetail : herbGrid}

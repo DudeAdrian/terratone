@@ -20,6 +20,13 @@ class FoodService {
     this.history = [];
     this.apiService = APIService;
     this.currentRegionId = null;
+
+    // Home-scale food production data
+    this.productionData = null;
+    this.nutritionMetrics = null;
+    this.storageInventory = null;
+    this.safetyRecords = null;
+    this.supplyPlanning = null;
   }
 
   initialize(regionId) {
@@ -27,6 +34,7 @@ class FoodService {
       this.currentRegionId = regionId;
       this.status = "initialized";
       sofieCore.getService("logger").log("[FoodService] Food production module initialized for region: " + regionId);
+      this.seedLocalData();
       // Fetch food data from backend
       this.fetchFoodDataFromAPI(regionId);
     } catch (error) {
@@ -262,6 +270,297 @@ class FoodService {
    */
   getYieldVariance() {
     return 3 + Math.random() * 5; // 3-8% variance
+  }
+
+  /**
+   * Seed local home-scale food production data
+   */
+  seedLocalData() {
+    const now = new Date();
+
+    // Production Data
+    this.productionData = {
+      gardens: [
+        {
+          gardenId: "Raised-Beds-1",
+          location: "South facing yard",
+          areaSqm: 12,
+          type: "raised beds",
+          status: "productive",
+          crops: ["tomatoes", "peppers", "basil"],
+          productivity: 94,
+          waterUse: 45, // liters today
+          lastHarvest: new Date(now - 86400000).toISOString(),
+          nextHarvest: new Date(now + 259200000).toISOString()
+        },
+        {
+          gardenId: "Container-Garden",
+          location: "Patio",
+          areaSqm: 8,
+          type: "containers",
+          status: "productive",
+          crops: ["lettuce", "spinach", "chard"],
+          productivity: 88,
+          waterUse: 20,
+          lastHarvest: new Date(now - 172800000).toISOString(),
+          nextHarvest: new Date(now + 172800000).toISOString()
+        },
+        {
+          gardenId: "Vertical-Wall",
+          location: "East wall",
+          areaSqm: 4,
+          type: "vertical",
+          status: "productive",
+          crops: ["strawberries", "herbs"],
+          productivity: 82,
+          waterUse: 15,
+          lastHarvest: new Date(now - 604800000).toISOString(),
+          nextHarvest: new Date(now + 345600000).toISOString()
+        }
+      ],
+      monthlyYield: 42.5, // kg
+      yearlyProjection: 510,
+      biodiversity: 24 // crop varieties
+    };
+
+    // Nutrition Metrics
+    this.nutritionMetrics = [
+      {
+        category: "Vegetables",
+        daily: 380, // grams
+        target: 400,
+        weeklyAvg: 2660,
+        topSources: ["tomatoes", "peppers", "lettuce", "spinach"],
+        nutritionValue: 85
+      },
+      {
+        category: "Fruits",
+        daily: 165,
+        target: 200,
+        weeklyAvg: 1155,
+        topSources: ["strawberries", "berries"],
+        nutritionValue: 92
+      },
+      {
+        category: "Proteins",
+        daily: 62,
+        target: 60,
+        weeklyAvg: 434,
+        topSources: ["legumes", "seeds", "nuts"],
+        nutritionValue: 88
+      },
+      {
+        category: "Carbohydrates",
+        daily: 285,
+        target: 325,
+        weeklyAvg: 1995,
+        topSources: ["potatoes", "grains"],
+        nutritionValue: 75
+      }
+    ];
+
+    // Storage Inventory
+    this.storageInventory = {
+      locations: [
+        {
+          locationId: "root-cellar",
+          name: "Root Cellar",
+          type: "Temperature-Controlled",
+          temperature: 4,
+          targetTemp: 4,
+          humidity: 95,
+          capacity: 50,
+          currentWeight: 35,
+          itemsStored: ["carrots", "beets", "potatoes", "onions"],
+          healthStatus: "Optimal"
+        },
+        {
+          locationId: "pantry",
+          name: "Pantry Shelves",
+          type: "Ambient Storage",
+          temperature: 18,
+          targetTemp: 18,
+          humidity: 60,
+          capacity: 30,
+          currentWeight: 24,
+          itemsStored: ["canned goods", "dried herbs", "seeds"],
+          healthStatus: "Good"
+        },
+        {
+          locationId: "freezer",
+          name: "Freezer",
+          type: "Deep Freeze",
+          temperature: -18,
+          targetTemp: -18,
+          humidity: 5,
+          capacity: 80,
+          currentWeight: 62,
+          itemsStored: ["berries", "herbs", "prepared meals"],
+          healthStatus: "Excellent"
+        }
+      ],
+      totalCapacity: 160,
+      wastePercentage: 2.5,
+      spoilageRisk: "low"
+    };
+
+    // Safety Records
+    this.safetyRecords = [
+      {
+        testId: "soil-001",
+        testType: "Soil Contaminants",
+        description: "Comprehensive soil safety analysis",
+        result: "PASS",
+        testDate: new Date(now - 604800000).toISOString(),
+        testedSample: "Root Cellar Soil",
+        location: "Root Cellar",
+        testedBy: "Dr. Sarah Green",
+        parameters: [
+          { name: "Pesticide Residue", value: "None detected", status: "PASS" },
+          { name: "Heavy Metals", value: "Safe levels", status: "PASS" },
+          { name: "Pathogens", value: "Negative", status: "PASS" }
+        ],
+        notes: "All soil parameters within safe limits. Excellent for organic production."
+      },
+      {
+        testId: "water-001",
+        testType: "Water Quality",
+        description: "Irrigation water safety test",
+        result: "PASS",
+        testDate: new Date(now - 1209600000).toISOString(),
+        testedSample: "Irrigation System",
+        location: "Garden Water Supply",
+        testedBy: "Dr. James Rivera",
+        parameters: [
+          { name: "pH Level", value: "7.0", status: "PASS" },
+          { name: "Nitrogen Content", value: "Safe", status: "PASS" },
+          { name: "Bacteria Count", value: "Negative", status: "PASS" }
+        ],
+        notes: "Water quality excellent. No treatment needed."
+      },
+      {
+        testId: "produce-001",
+        testType: "Produce Analysis",
+        description: "Fresh produce quality assessment",
+        result: "PASS",
+        testDate: new Date(now - 1814400000).toISOString(),
+        testedSample: "Mixed Vegetables",
+        location: "Post-Harvest",
+        testedBy: "Dr. Lisa Chen",
+        parameters: [
+          { name: "Pesticide Residue", value: "None detected", status: "PASS" },
+          { name: "Quality Score", value: "96/100", status: "PASS" },
+          { name: "Nutrition Intact", value: "Yes", status: "PASS" }
+        ],
+        notes: "High quality produce with excellent nutritional content."
+      },
+      {
+        testId: "storage-001",
+        testType: "Storage Hygiene",
+        description: "Storage facility contamination check",
+        result: "PASS",
+        testDate: new Date(now - 2419200000).toISOString(),
+        testedSample: "Storage Environment",
+        location: "All Storage Areas",
+        testedBy: "Dr. Michael Foster",
+        parameters: [
+          { name: "Mold Spores", value: "None detected", status: "PASS" },
+          { name: "Pest Activity", value: "None found", status: "PASS" },
+          { name: "Contamination Risk", value: "Low", status: "PASS" }
+        ],
+        notes: "Storage facilities maintain excellent sanitation standards."
+      }
+    ];
+
+    // Supply Planning
+    this.supplyPlanning = {
+      currentSeason: "Summer",
+      upcomingHarvests: [
+        { 
+          cropId: "tomato-001",
+          cropName: "Tomatoes", 
+          gardenLocation: "Raised Beds - South",
+          estimatedHarvestDate: new Date(now + 259200000).toISOString(), 
+          estimatedYield: 8.5, 
+          maturityPercentage: 85,
+          status: "Near Ready",
+          notes: "Plants flowering well, expect harvest in 3-4 days"
+        },
+        { 
+          cropId: "lettuce-001",
+          cropName: "Lettuce", 
+          gardenLocation: "Container Garden - Patio",
+          estimatedHarvestDate: new Date(now + 172800000).toISOString(), 
+          estimatedYield: 3.2, 
+          maturityPercentage: 92,
+          status: "Ready Soon",
+          notes: "Heads fully formed, harvest in 2 days"
+        },
+        { 
+          cropId: "pepper-001",
+          cropName: "Peppers", 
+          gardenLocation: "Raised Beds - South",
+          estimatedHarvestDate: new Date(now + 432000000).toISOString(), 
+          estimatedYield: 5.8, 
+          maturityPercentage: 60,
+          status: "Developing",
+          notes: "Fruit sizing well, continue watering"
+        },
+        { 
+          cropId: "herbs-001",
+          cropName: "Herbs", 
+          gardenLocation: "Vertical Wall - East",
+          estimatedHarvestDate: new Date(now + 86400000).toISOString(), 
+          estimatedYield: 0.5, 
+          maturityPercentage: 95,
+          status: "Harvest Today",
+          notes: "Ready for harvest now"
+        },
+        { 
+          cropId: "squash-001",
+          cropName: "Squash", 
+          gardenLocation: "Raised Beds - South",
+          estimatedHarvestDate: new Date(now + 604800000).toISOString(), 
+          estimatedYield: 12.3, 
+          maturityPercentage: 40,
+          status: "Growing",
+          notes: "Vine is flowering, fruits developing"
+        }
+      ],
+      seasonalSchedule: [
+        { phase: "Spring Planting", crops: ["lettuce", "spinach", "peas", "beans"], timing: "March-April" },
+        { phase: "Summer Growth", crops: ["tomatoes", "peppers", "basil", "squash"], timing: "May-July" },
+        { phase: "Fall Harvest", crops: ["carrots", "kale", "beets", "chard"], timing: "August-October" },
+        { phase: "Winter Storage", crops: ["stored crops", "sprouts", "microgreens"], timing: "November-February" }
+      ],
+      storageCapacityUsed: 76,
+      projectedCapacityAfterHarvest: 95,
+      storageDistribution: [
+        { location: "Root Cellar", projectedKg: 45, percentageOfTotal: 35 },
+        { location: "Pantry Shelves", projectedKg: 32, percentageOfTotal: 25 },
+        { location: "Freezer", projectedKg: 83, percentageOfTotal: 65 }
+      ]
+    };
+  }
+
+  getProductionData() {
+    return this.productionData;
+  }
+
+  getNutritionMetrics() {
+    return this.nutritionMetrics;
+  }
+
+  getStorageInventory() {
+    return this.storageInventory;
+  }
+
+  getSafetyRecords() {
+    return this.safetyRecords;
+  }
+
+  getSupplyPlanning() {
+    return this.supplyPlanning;
   }
 }
 

@@ -1,22 +1,10 @@
-// src/pages/Home_v2.js - Glassmorphic Landing Page with Neon Chakra Theming
+// src/pages/Home.js - Glassmorphic Landing Page
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import { QuantumCard, QuantumGlassGrid, QuantumSection } from "../theme/QuantumGlassTheme";
-import BiometricsMonitor from "../components/BiometricsMonitor";
-import VoiceInterface from "../components/VoiceInterface";
-import biometricsService from "../services/BiometricsService";
+import { HolographicCard } from "../theme/QuantumGlassTheme";
 
 const Home = () => {
-  const [showWellness, setShowWellness] = useState(false);
-
-  useEffect(() => {
-    // Check if user has biometric data
-    const readings = biometricsService.getCurrentReadings();
-    if (readings.timestamp) {
-      setShowWellness(true);
-    }
-  }, []);
 
   const features = [
     {
@@ -24,160 +12,134 @@ const Home = () => {
       title: "Energy Systems",
       description: "Monitor solar production, battery levels, and grid balance in real-time.",
       link: "/services/energy",
-      chakra: "solar",
+      glow: "amber",
     },
     {
       icon: "👥",
       title: "Community",
       description: "Connect, collaborate, and empower your local community.",
       link: "/services/community",
-      chakra: "throat",
+      glow: "cyan",
     },
     {
       icon: "🌍",
       title: "Sustainability",
       description: "Track food, water, housing, and environmental metrics.",
       link: "/sustainability",
-      chakra: "heart",
+      glow: "emerald",
     },
     {
       icon: "⚙️",
       title: "Admin",
       description: "Manage users, settings, and system configuration.",
       link: "/admin",
-      chakra: "third_eye",
+      glow: "violet",
     },
     {
       icon: "🧘‍♀️",
       title: "Wellness Intelligence",
       description: "Real-time biometrics with voice-activated health monitoring.",
       link: "/wellness-dashboard",
-      chakra: "crown",
+      glow: "violet",
     },
     {
       icon: "🌿",
       title: "Herbal Library",
       description: "Natural remedies and personalized wellness recommendations.",
       link: "/herbal-library",
-      chakra: "heart",
+      glow: "emerald",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-gray-900 to-teal-950 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-12">
+    <div className="relative min-h-screen bg-transparent p-4 md:p-8">
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-amber-500/5 via-white/5 to-cyan-400/5 blur-3xl" />
+      <div className="max-w-7xl mx-auto space-y-12 relative z-10">
         {/* Hero Section */}
-        <QuantumSection chakra="heart">
-          <div className="text-center">
-            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-emerald-300 to-green-400 bg-clip-text text-transparent mb-4">
+        <HolographicCard glowColor="amber" interactive={false}>
+          <div className="text-center space-y-3">
+            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-amber-300 to-orange-200 bg-clip-text text-transparent">
               🌱 Sofie Systems
             </h1>
-            <p className="text-xl text-emerald-200 max-w-3xl mx-auto mb-4">
+            <p className="text-lg md:text-xl text-slate-800 max-w-3xl mx-auto">
               Operating System for Harmonic Habitats communities. Empowering sustainable living through integrated systems, collaborative networks, and intelligent resource management.
             </p>
-            <p className="text-lg font-semibold bg-gradient-to-r from-emerald-400 to-green-300 bg-clip-text text-transparent">
+            <p className="text-base md:text-lg font-semibold text-amber-700">
               The benchmark operating system for regenerative living
             </p>
-            <div className="mt-6 text-xs inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-emerald-400/30 shadow-[0_0_20px_rgba(0,255,136,0.3)]">
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(0,255,136,0.8)]"></div>
-              <span className="font-semibold text-emerald-200">Network syncing</span>
+            <div className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/60 backdrop-blur-md border border-white/50 shadow-lg text-xs font-semibold text-amber-800">
+              <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
+              Network syncing
             </div>
           </div>
-        </QuantumSection>
+        </HolographicCard>
+
+        {/* Global Network CTA */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <HolographicCard glowColor="amber">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-amber-700">Global Map</p>
+                <h2 className="text-2xl font-bold text-slate-900">50+ communities live</h2>
+                <p className="text-slate-700 mt-1">See population, energy, water, and health overlays across all regions.</p>
+              </div>
+              <Link
+                to="/global-map"
+                className="px-5 py-2 rounded-full bg-amber-500 text-white font-semibold shadow hover:shadow-lg transition"
+              >
+                Open Map →
+              </Link>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-amber-800">
+              <span className="px-3 py-1 rounded-full bg-white/70 border border-white/60">Population insights</span>
+              <span className="px-3 py-1 rounded-full bg-white/70 border border-white/60">Live metrics</span>
+              <span className="px-3 py-1 rounded-full bg-white/70 border border-white/60">Regional filters</span>
+            </div>
+          </HolographicCard>
+
+          <HolographicCard glowColor="emerald">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-emerald-700">Herbal Library</p>
+                <h2 className="text-2xl font-bold text-slate-900">Indigenous knowledge</h2>
+                <p className="text-slate-700 mt-1">11 herbs across 7 traditions, ready offline with safety notes.</p>
+              </div>
+              <Link
+                to="/herbal-library"
+                className="px-5 py-2 rounded-full bg-emerald-500 text-white font-semibold shadow hover:shadow-lg transition"
+              >
+                Browse Herbs →
+              </Link>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-emerald-800">
+              <span className="px-3 py-1 rounded-full bg-white/70 border border-white/60">Search & filter</span>
+              <span className="px-3 py-1 rounded-full bg-white/70 border border-white/60">Traditions</span>
+              <span className="px-3 py-1 rounded-full bg-white/70 border border-white/60">Safety ready</span>
+            </div>
+          </HolographicCard>
+        </div>
 
         {/* Feature Cards */}
-        <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-emerald-100 mb-4">Featured Services</h2>
-          <QuantumGlassGrid columns={2} gap={6}>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-white/90">Featured Services</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {features.map((feature) => (
               <Link key={feature.link} to={feature.link}>
-                <QuantumCard 
-                  chakra={feature.chakra}
-                  blurLevel="deep"
-                  opacityLevel="ultraClear"
-                  glow={true}
-                  edgeGlow={true}
-                  interactive={true}
-                >
+                <HolographicCard glowColor={feature.glow}>
                   <div className="flex items-start justify-between mb-4">
-                    <span className="text-4xl drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">{feature.icon}</span>
-                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-emerald-200 shadow-[0_0_10px_rgba(0,255,136,0.3)]">
+                    <span className="text-4xl drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]">{feature.icon}</span>
+                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-white/70 backdrop-blur-sm border border-white/50 text-slate-800 shadow">
                       Active
                     </span>
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-2 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">{feature.title}</h3>
-                  <p className="text-emerald-100 mb-4">{feature.description}</p>
-                  <div className="text-sm font-semibold text-emerald-300 drop-shadow-[0_0_5px_rgba(0,255,136,0.5)]">Explore →</div>
-                </QuantumCard>
+                  <h3 className="text-2xl font-bold text-slate-900 mb-2">{feature.title}</h3>
+                  <p className="text-slate-700 mb-4">{feature.description}</p>
+                  <div className="text-sm font-semibold text-amber-700">Explore →</div>
+                </HolographicCard>
               </Link>
             ))}
-          </QuantumGlassGrid>
+          </div>
         </div>
-
-        {/* Wellness Intelligence Widgets (if user has data) */}
-        {showWellness && (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-white">🧘‍♀️ Wellness Intelligence</h2>
-              <Link 
-                to="/wellness-dashboard"
-                className="text-sm font-semibold text-purple-400 hover:underline drop-shadow-[0_0_10px_rgba(170,76,255,0.5)]"
-              >
-                View Full Dashboard →
-              </Link>
-            </div>
-            <QuantumGlassGrid columns={2} gap={6}>
-              <QuantumCard chakra="crown" blurLevel="deep" opacityLevel="ultraClear" glow={true}>
-                <BiometricsMonitor compact={true} />
-              </QuantumCard>
-              <QuantumCard chakra="throat" blurLevel="deep" opacityLevel="ultraClear" glow={true}>
-                <VoiceInterface compact={true} />
-              </QuantumCard>
-            </QuantumGlassGrid>
-          </div>
-        )}
-
-        {/* System Overview */}
-        <QuantumSection chakra="third_eye">
-          <h2 className="text-3xl font-bold text-white mb-6 text-center drop-shadow-[0_0_15px_rgba(170,76,255,0.5)]">System Overview</h2>
-          <QuantumGlassGrid columns={3} gap={6}>
-            <QuantumCard chakra="heart" blurLevel="medium" opacityLevel="veil" glow={true}>
-              <div className="text-center">
-                <div className="text-4xl mb-3 drop-shadow-[0_0_10px_rgba(0,255,136,0.5)]">♻️</div>
-                <h3 className="text-lg font-bold text-white">Sustainable</h3>
-                <p className="text-emerald-200 text-sm mt-1">Zero-waste living solutions</p>
-              </div>
-            </QuantumCard>
-            <QuantumCard chakra="throat" blurLevel="medium" opacityLevel="veil" glow={true}>
-              <div className="text-center">
-                <div className="text-4xl mb-3 drop-shadow-[0_0_10px_rgba(0,187,255,0.5)]">🤝</div>
-                <h3 className="text-lg font-bold text-white">Connected</h3>
-                <p className="text-cyan-200 text-sm mt-1">Community-driven development</p>
-              </div>
-            </QuantumCard>
-            <QuantumCard chakra="third_eye" blurLevel="medium" opacityLevel="veil" glow={true}>
-              <div className="text-center">
-                <div className="text-4xl mb-3 drop-shadow-[0_0_10px_rgba(170,76,255,0.5)]">🧠</div>
-                <h3 className="text-lg font-bold text-white">Intelligent</h3>
-                <p className="text-violet-200 text-sm mt-1">AI-powered optimization</p>
-              </div>
-            </QuantumCard>
-          </QuantumGlassGrid>
-        </QuantumSection>
-
-        {/* Call to Action */}
-        <QuantumSection chakra="heart">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-white mb-4 drop-shadow-[0_0_15px_rgba(0,255,136,0.5)]">Ready to Transform Your Space?</h2>
-            <p className="text-lg text-emerald-200 mb-6">Start tracking your sustainability metrics today.</p>
-            <Link
-              to="/sustainability"
-              className="inline-block px-8 py-3 rounded-lg font-bold bg-gradient-to-r from-emerald-400 to-green-500 text-white hover:shadow-[0_0_30px_rgba(0,255,136,0.7)] transition-all"
-            >
-              Launch Sustainability Dashboard
-            </Link>
-          </div>
-        </QuantumSection>
       </div>
     </div>
   );

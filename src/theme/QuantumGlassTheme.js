@@ -37,18 +37,18 @@ export const QuantumParams = {
     stack: 'backdrop-blur-3xl',        // Stacked blur for enhanced depth
   },
 
-  // Transparency Spectrum - Wave function collapse (ENHANCED: More vibrant with color showing)
+  // Transparency Spectrum - Wave function collapse (ENHANCED: Frosted glass like holographic panel)
   opacity: {
-    crystal: 'bg-white/1 dark:bg-black/1',      // 1% - Crystal clear (shows color through)
-    ultraClear: 'bg-white/2 dark:bg-black/2',   // 2% - Ultra transparent (color visible)
-    quantum: 'bg-white/5 dark:bg-black/5',      // 5% - Pure superposition
-    ethereal: 'bg-white/8 dark:bg-black/8',     // 8% - Near-transparent
-    veil: 'bg-white/12 dark:bg-black/12',       // 12% - Semi-transparent
-    mist: 'bg-white/15 dark:bg-black/15',       // 15% - Visible mist
-    fog: 'bg-white/20 dark:bg-black/20',        // 20% - Deep fog
-    haze: 'bg-white/25 dark:bg-black/25',       // 25% - Moderate haze
-    cloud: 'bg-white/30 dark:bg-black/30',      // 30% - Cloud-like
-    dense: 'bg-white/40 dark:bg-black/40',      // 40% - Dense glass
+    crystal: 'bg-white/8 dark:bg-white/8',        // 8% - Frosted glass base
+    ultraClear: 'bg-white/12 dark:bg-white/10',   // 12% - Light frosted
+    quantum: 'bg-white/15 dark:bg-white/12',      // 15% - Medium frosted
+    ethereal: 'bg-white/18 dark:bg-white/15',     // 18% - Visible frosted
+    veil: 'bg-white/22 dark:bg-white/18',         // 22% - Strong frosted
+    mist: 'bg-white/25 dark:bg-white/20',         // 25% - Deep frosted
+    fog: 'bg-white/30 dark:bg-white/25',          // 30% - Opaque frosted
+    haze: 'bg-white/35 dark:bg-white/30',         // 35% - Solid frosted
+    cloud: 'bg-white/40 dark:bg-white/35',        // 40% - Very opaque
+    dense: 'bg-white/50 dark:bg-white/45',        // 50% - Almost solid
   },
 
   // Border Transparency - Quantum boundary states (ENHANCED: Color-hued edges)
@@ -63,13 +63,15 @@ export const QuantumParams = {
 
   // Edge Halos - NEON Color-shifted borders with quantum glow (VIBRANT)
   edgeHalo: {
-    root: 'shadow-[0_0_30px_rgba(255,0,85,0.7),0_0_60px_rgba(255,0,85,0.4),inset_0_0_20px_rgba(255,0,85,0.2)]',
-    sacral: 'shadow-[0_0_30px_rgba(255,102,0,0.7),0_0_60px_rgba(255,102,0,0.4),inset_0_0_20px_rgba(255,102,0,0.2)]',
-    solar: 'shadow-[0_0_30px_rgba(255,255,0,0.7),0_0_60px_rgba(255,255,0,0.4),inset_0_0_20px_rgba(255,255,0,0.2)]',
-    heart: 'shadow-[0_0_30px_rgba(0,255,136,0.7),0_0_60px_rgba(0,255,136,0.4),inset_0_0_20px_rgba(0,255,136,0.2)]',
-    throat: 'shadow-[0_0_30px_rgba(0,187,255,0.7),0_0_60px_rgba(0,187,255,0.4),inset_0_0_20px_rgba(0,187,255,0.2)]',
-    third_eye: 'shadow-[0_0_30px_rgba(170,76,255,0.7),0_0_60px_rgba(170,76,255,0.4),inset_0_0_20px_rgba(170,76,255,0.2)]',
-    crown: 'shadow-[0_0_30px_rgba(255,0,170,0.7),0_0_60px_rgba(255,0,170,0.4),inset_0_0_20px_rgba(255,0,170,0.2)]',
+    root: 'shadow-[0_0_40px_rgba(255,0,85,0.6),0_0_80px_rgba(255,0,85,0.3),0_4px_20px_rgba(0,0,0,0.3)]',
+    sacral: 'shadow-[0_0_40px_rgba(255,170,0,0.6),0_0_80px_rgba(255,170,0,0.3),0_4px_20px_rgba(0,0,0,0.3)]',
+    solar: 'shadow-[0_0_40px_rgba(255,200,50,0.6),0_0_80px_rgba(255,200,50,0.3),0_4px_20px_rgba(0,0,0,0.3)]',
+    heart: 'shadow-[0_0_40px_rgba(0,255,136,0.6),0_0_80px_rgba(0,255,136,0.3),0_4px_20px_rgba(0,0,0,0.3)]',
+    throat: 'shadow-[0_0_40px_rgba(0,187,255,0.6),0_0_80px_rgba(0,187,255,0.3),0_4px_20px_rgba(0,0,0,0.3)]',
+    third_eye: 'shadow-[0_0_40px_rgba(170,76,255,0.6),0_0_80px_rgba(170,76,255,0.3),0_4px_20px_rgba(0,0,0,0.3)]',
+    crown: 'shadow-[0_0_40px_rgba(255,0,170,0.6),0_0_80px_rgba(255,0,170,0.3),0_4px_20px_rgba(0,0,0,0.3)]',
+    // HOLOGRAPHIC PANEL STYLE - Warm golden glow like the image
+    holographic: 'shadow-[0_0_60px_rgba(255,200,100,0.7),0_0_100px_rgba(255,170,70,0.4),0_8px_30px_rgba(0,0,0,0.4)]',
   },
 
   // NEON Chakra Colors - Vibrant energy center alignment with enhanced glow
@@ -772,6 +774,168 @@ export const QuantumSection = ({
 };
 
 // ============================================================================
+// HOLOGRAPHIC PANEL - Matches the golden glowing touch panel aesthetic
+// ============================================================================
+
+export const HolographicCard = ({
+  children,
+  className = '',
+  interactive = true,
+  glowColor = 'amber', // amber, emerald, cyan, violet
+  style,
+  ...props
+}) => {
+  const glowColors = {
+    amber: {
+      shadow: 'shadow-[0_10px_50px_rgba(251,191,36,0.45),0_0_80px_rgba(245,158,11,0.35),0_12px_40px_rgba(0,0,0,0.45)]',
+      border: 'border-amber-100/50',
+      panelSurface: 'bg-gradient-to-br from-[#fef9f3]/75 via-white/68 to-[#fff7e6]/78',
+      background:
+        'radial-gradient(circle at 18% 22%, rgba(255,214,130,0.18), rgba(255,214,130,0) 32%),\
+         radial-gradient(circle at 82% 8%, rgba(255,171,94,0.14), rgba(255,171,94,0) 30%),\
+         linear-gradient(135deg, #fff8e5 0%, #fbead1 42%, #f7d7a6 100%)',
+      glow: 'from-amber-300/60 via-amber-200/40 to-orange-300/25',
+      hoverGlow: 'hover:shadow-[0_14px_70px_rgba(251,191,36,0.7),0_0_120px_rgba(245,158,11,0.5),0_18px_50px_rgba(0,0,0,0.55)]',
+      edge: 'from-white/55 via-amber-200/40 to-white/20',
+    },
+    emerald: {
+      shadow: 'shadow-[0_10px_50px_rgba(16,185,129,0.45),0_0_80px_rgba(5,150,105,0.35),0_12px_40px_rgba(0,0,0,0.45)]',
+      border: 'border-emerald-100/50',
+      panelSurface: 'bg-gradient-to-br from-[#f1fbf5]/75 via-white/68 to-[#e6fff4]/78',
+      background:
+        'radial-gradient(circle at 18% 22%, rgba(120,255,200,0.16), rgba(120,255,200,0) 32%),\
+         radial-gradient(circle at 82% 8%, rgba(90,235,190,0.12), rgba(90,235,190,0) 30%),\
+         linear-gradient(135deg, #f2fcf6 0%, #e6f9f0 42%, #d7f4e6 100%)',
+      glow: 'from-emerald-300/60 via-teal-200/40 to-emerald-200/25',
+      hoverGlow: 'hover:shadow-[0_14px_70px_rgba(16,185,129,0.7),0_0_120px_rgba(5,150,105,0.5),0_18px_50px_rgba(0,0,0,0.55)]',
+      edge: 'from-white/55 via-emerald-200/40 to-white/20',
+    },
+    cyan: {
+      shadow: 'shadow-[0_10px_50px_rgba(6,182,212,0.45),0_0_80px_rgba(8,145,178,0.35),0_12px_40px_rgba(0,0,0,0.45)]',
+      border: 'border-cyan-100/50',
+      panelSurface: 'bg-gradient-to-br from-[#f2fbff]/75 via-white/68 to-[#e8f9ff]/78',
+      background:
+        'radial-gradient(circle at 18% 22%, rgba(160,230,255,0.16), rgba(160,230,255,0) 32%),\
+         radial-gradient(circle at 82% 8%, rgba(120,210,255,0.12), rgba(120,210,255,0) 30%),\
+         linear-gradient(135deg, #f2fbff 0%, #e8f7ff 42%, #ddf0ff 100%)',
+      glow: 'from-cyan-300/60 via-sky-200/40 to-cyan-200/25',
+      hoverGlow: 'hover:shadow-[0_14px_70px_rgba(6,182,212,0.7),0_0_120px_rgba(8,145,178,0.5),0_18px_50px_rgba(0,0,0,0.55)]',
+      edge: 'from-white/55 via-cyan-200/40 to-white/20',
+    },
+    violet: {
+      shadow: 'shadow-[0_10px_50px_rgba(139,92,246,0.45),0_0_80px_rgba(124,58,237,0.35),0_12px_40px_rgba(0,0,0,0.45)]',
+      border: 'border-violet-100/50',
+      panelSurface: 'bg-gradient-to-br from-[#f8f5ff]/75 via-white/68 to-[#f0eaff]/78',
+      background:
+        'radial-gradient(circle at 18% 22%, rgba(208,180,255,0.16), rgba(208,180,255,0) 32%),\
+         radial-gradient(circle at 82% 8%, rgba(180,160,255,0.12), rgba(180,160,255,0) 30%),\
+         linear-gradient(135deg, #f8f5ff 0%, #f1ebff 42%, #e7dfff 100%)',
+      glow: 'from-violet-300/60 via-purple-200/40 to-violet-200/25',
+      hoverGlow: 'hover:shadow-[0_14px_70px_rgba(139,92,246,0.7),0_0_120px_rgba(124,58,237,0.5),0_18px_50px_rgba(0,0,0,0.55)]',
+      edge: 'from-white/55 via-violet-200/40 to-white/20',
+    },
+  };
+
+  const colors = glowColors[glowColor] || glowColors.amber;
+
+  return (
+    <div
+      className={`
+        relative
+        group
+        overflow-hidden
+        rounded-3xl
+        p-6
+        backdrop-blur-[28px]
+        border
+        ${colors.border}
+        ${colors.panelSurface}
+        ${colors.shadow}
+        ${interactive ? colors.hoverGlow : ''}
+        ${interactive ? 'cursor-pointer hover:-translate-y-2' : ''}
+        transition-all duration-500 ease-out
+        ${className}
+      `}
+      style={{
+        background: colors.background,
+        ...style,
+      }}
+      {...props}
+    >
+      {/* Backdrop glow aura */}
+      <div className={`
+        absolute
+        -inset-6
+        bg-gradient-to-br
+        ${colors.glow}
+        opacity-0
+        group-hover:opacity-45
+        blur-3xl
+        rounded-[28px]
+        transition-opacity duration-500
+        pointer-events-none
+      `} />
+
+      {/* Glass core */}
+      <div className="absolute inset-[1px] rounded-[22px] bg-white/6 border border-white/12 backdrop-blur-[30px]" />
+
+      {/* Inner frame with subtle amber/cyan edge sweep */}
+      <div
+        className="absolute inset-[8px] rounded-[20px] border border-white/16 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
+        style={{
+          background:
+            'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)),\
+             linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0)),\
+             linear-gradient(0deg, rgba(255,255,255,0.06), rgba(255,255,255,0))',
+        }}
+      />
+
+      {/* Grid and etching lines to mimic wall panel circuitry */}
+      <div
+        className="absolute inset-[10px] rounded-[18px] opacity-60 mix-blend-screen"
+        style={{
+          backgroundImage:
+            'linear-gradient(0deg, rgba(255,214,130,0.16) 1px, transparent 1px),\
+             linear-gradient(90deg, rgba(255,214,130,0.16) 1px, transparent 1px),\
+             radial-gradient(circle at 15% 20%, rgba(255,255,255,0.12), transparent 38%),\
+             radial-gradient(circle at 85% 8%, rgba(255,255,255,0.08), transparent 32%)',
+          backgroundSize: '140px 140px, 140px 140px, 100% 100%, 100% 100%',
+          border: '1px solid rgba(255,255,255,0.08)',
+        }}
+      />
+
+      {/* Edge light sweep */}
+      <div className={`
+        absolute
+        inset-0.5
+        rounded-[24px]
+        bg-gradient-to-tr
+        ${colors.edge}
+        opacity-70
+        pointer-events-none
+      `} />
+
+      {/* Top highlight bar */}
+      <div className="absolute inset-x-3 top-3 h-0.5 rounded-full bg-white/35 blur-[1px] opacity-70" />
+
+      {/* Fine noise to sell the glass */}
+      <div
+        className="absolute inset-0 rounded-3xl opacity-[0.18] mix-blend-soft-light"
+        style={{
+          backgroundImage:
+            'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22 viewBox=%220 0 40 40%22%3E%3Cpath fill=%22%23ffffff%22 fill-opacity=%220.35%22 d=%22M0 38h2v2H0zM38 0h2v2h-2zM18 18h2v2h-2zM28 28h2v2h-2zM8 8h2v2H8z%22/%3E%3C/svg%3E")',
+        }}
+      />
+
+      {/* Inner content */}
+      <div className="relative z-10">
+        {children}
+      </div>
+    </div>
+  );
+};
+
+// ============================================================================
 // EXPORT - Quantum Theme Package
 // ============================================================================
 
@@ -785,6 +949,7 @@ const QuantumGlassTheme = {
   QuantumGlassGrid,
   QuantumModal,
   QuantumSection,
+  HolographicCard, // NEW: Golden glowing panel style
 };
 
 export default QuantumGlassTheme;

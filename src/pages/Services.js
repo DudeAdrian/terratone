@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { QuantumSection, QuantumCard, QuantumGlassGrid } from "../theme/QuantumGlassTheme";
+import { HolographicCard } from "../theme/QuantumGlassTheme";
 
 const Services = () => {
   const services = [
@@ -51,53 +51,50 @@ const Services = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-950 via-gray-900 to-emerald-950 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="relative min-h-screen bg-transparent p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8 relative z-10">
         {/* Header */}
-        <QuantumSection chakra="heart">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-green-300 to-emerald-400 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(0,255,136,0.5)]">
-            Services Hub
-          </h1>
-          <p className="text-emerald-200 mt-2">Access all Sofie Systems modules and tools</p>
-        </QuantumSection>
+        <HolographicCard glowColor="emerald" interactive={false}>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-emerald-700">Access Hub</p>
+              <h1 className="text-4xl font-bold text-slate-900">Services</h1>
+              <p className="text-slate-700 mt-2">All Sofie Systems modules in one place.</p>
+            </div>
+            <div className="flex flex-wrap gap-2 text-xs font-semibold text-emerald-800">
+              <span className="px-3 py-1 rounded-full bg-white/70 border border-white/60">Web3-ready</span>
+              <span className="px-3 py-1 rounded-full bg-white/70 border border-white/60">Blockchain verified</span>
+              <span className="px-3 py-1 rounded-full bg-white/70 border border-white/60">Integrated</span>
+            </div>
+          </div>
+        </HolographicCard>
 
         {/* Services Grid */}
-        <QuantumGlassGrid columns={2} gap={6}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {services.map((service, idx) => (
             <Link key={idx} to={service.path}>
-              <QuantumCard 
-                chakra={service.chakra} 
-                blurLevel="deep" 
-                opacityLevel="ultraClear" 
-                glow={true} 
-                edgeGlow={true} 
-                interactive={true}
-              >
+              <HolographicCard glowColor={service.chakra === 'heart' ? 'emerald' : service.chakra === 'solar' ? 'amber' : service.chakra === 'throat' ? 'cyan' : 'violet'}>
                 <div className="flex items-start justify-between mb-4">
-                  <span className="text-4xl drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">{service.icon}</span>
-                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-emerald-200 shadow-[0_0_10px_rgba(0,255,136,0.3)]">
+                  <span className="text-4xl drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]">{service.icon}</span>
+                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-white/70 backdrop-blur-sm border border-white/50 text-slate-800 shadow">
                     Active
                   </span>
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-2 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">{service.title}</h3>
-                <p className="text-emerald-100 mb-4">{service.description}</p>
-                <div className="text-sm font-semibold text-emerald-300 drop-shadow-[0_0_5px_rgba(0,255,136,0.5)]">
-                  Access →
-                </div>
-              </QuantumCard>
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">{service.title}</h3>
+                <p className="text-slate-700 mb-4">{service.description}</p>
+                <div className="text-sm font-semibold text-emerald-700">Access →</div>
+              </HolographicCard>
             </Link>
           ))}
-        </QuantumGlassGrid>
+        </div>
 
         {/* Info Section */}
-        <QuantumSection chakra="heart">
-          <h2 className="text-2xl font-bold text-white mb-4 drop-shadow-[0_0_15px_rgba(0,255,136,0.5)]">About Services</h2>
-          <p className="text-emerald-200">
-            Each service represents a critical module of the Sofie Systems operating system. All services are Web3-enabled,
-            blockchain-verified, and connected through our distributed architecture to ensure seamless integration across
-            your Harmonic Habitats community.
+        <HolographicCard glowColor="emerald" interactive={false}>
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">About Services</h2>
+          <p className="text-slate-700">
+            Each service is a core module of the Sofie Systems OS. They are Web3-ready, blockchain-verified, and fully integrated to keep your Harmonic Habitat in sync.
           </p>
-        </QuantumSection>
+        </HolographicCard>
       </div>
     </div>
   );

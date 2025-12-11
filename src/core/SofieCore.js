@@ -31,6 +31,7 @@ import PestManagementService from "../services/PestManagementService";
 import WaterRecyclingService from "../services/WaterRecyclingService";
 import AquaticLifeService from "../services/AquaticLifeService";
 import AutopilotService from "../services/AutopilotService";
+import ClimateService from "../services/ClimateService";
 import IoTService from "../services/IoTService";
 import PredictiveAnalyticsService from "../services/PredictiveAnalyticsService";
 import ImpactTrackingService from "../services/ImpactTrackingService";
@@ -100,6 +101,10 @@ class SofieCore {
     // Original Services
     this.registerService("energy", EnergyService);
     LoggerService.log("Energy service registered and active.");
+
+    this.registerService("climate", ClimateService);
+    ClimateService.initialize();
+    LoggerService.log("Climate service registered and active.");
 
     this.registerService("community", CommunityService);
     LoggerService.log("Community service registered and active.");

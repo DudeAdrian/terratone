@@ -16,6 +16,14 @@ class WaterService {
     this.history = [];
     this.apiService = APIService;
     this.currentRegionId = null;
+
+    // Sustainable living datasets (home-scale diligence)
+    this.potableQualityMetrics = [];
+    this.usageRecords = [];
+    this.leakEvents = [];
+    this.sensorHealth = [];
+    this.irrigationZones = [];
+    this.irrigationEvents = [];
   }
 
   initialize(regionId) {
@@ -23,6 +31,7 @@ class WaterService {
       this.currentRegionId = regionId;
       this.status = "initialized";
       sofieCore.getService("logger").log("[WaterService] Water conservation module initialized for region: " + regionId);
+      this.seedLocalData();
       // Fetch water data from backend
       this.fetchWaterDataFromAPI(regionId);
     } catch (error) {
@@ -30,6 +39,39 @@ class WaterService {
       sofieCore.getService("logger").error("[WaterService] Initialization failed", error);
       throw error;
     }
+  }
+
+  seedLocalData() {
+    // Potable quality metrics (home operations focus)
+    this.potableQualityMetrics = [
+      { sourceId: "tap-01", turbidity: 0.3, pH: 7.4, conductivity: 420, residualChlorine: 0.4, tds: 210, coliform: 0, hardness: 120, temperature: 22, status: "pass", timestamp: new Date().toISOString() },
+      { sourceId: "rain-01", turbidity: 0.8, pH: 6.8, conductivity: 90, residualChlorine: 0.0, tds: 55, coliform: 0, hardness: 35, temperature: 21, status: "pass", timestamp: new Date(Date.now() - 86400000).toISOString() },
+    ];
+
+    // Usage analytics (home categories)
+    this.usageRecords = [
+      { id: "use-001", category: "domestic", liters: 320, meterId: "home-main", zone: "household", timestamp: new Date().toISOString() },
+      { id: "use-002", category: "irrigation", liters: 180, meterId: "garden-01", zone: "garden", timestamp: new Date().toISOString() },
+    ];
+
+    // Leak detection events and sensor health
+    this.leakEvents = [
+      { id: "leak-001", sensorId: "prs-12", zone: "corridor", pressureDrop: 0.35, flowDelta: 18, confidence: 0.82, startedAt: new Date(Date.now() - 3600000).toISOString(), resolvedAt: null, status: "investigating", actionTaken: "Isolate valve pending" },
+    ];
+    this.sensorHealth = [
+      { sensorId: "prs-12", battery: 92, signal: 88, lastSeen: new Date().toISOString(), location: "corridor" },
+      { sensorId: "prs-14", battery: 77, signal: 81, lastSeen: new Date().toISOString(), location: "kitchen" },
+    ];
+
+    // Irrigation planning and events
+    this.irrigationZones = [
+      { zoneId: "zone-garden", crop: "mixed vegetables", areaSqm: 60, soilType: "loam", etRate: 4.2, targetMoisture: 28, schedule: "06:00, 18:30", source: "rain/grey", dailyAllotment: 180, lastIrrigation: new Date(Date.now() - 7200000).toISOString(), nextIrrigation: new Date(Date.now() + 32400000).toISOString() },
+      { zoneId: "zone-greenhouse", crop: "leafy greens", areaSqm: 40, soilType: "hydroponic media", etRate: 3.1, targetMoisture: 30, schedule: "05:30, 17:30", source: "recycled", dailyAllotment: 140, lastIrrigation: new Date(Date.now() - 5400000).toISOString(), nextIrrigation: new Date(Date.now() + 30600000).toISOString() },
+    ];
+    this.irrigationEvents = [
+      { id: "irr-001", zoneId: "zone-garden", volume: 90, durationMin: 18, source: "rain", timestamp: new Date(Date.now() - 7200000).toISOString(), weatherOverride: false },
+      { id: "irr-002", zoneId: "zone-greenhouse", volume: 70, durationMin: 15, source: "recycled", timestamp: new Date(Date.now() - 5400000).toISOString(), weatherOverride: false },
+    ];
   }
 
   async fetchWaterDataFromAPI(regionId) {
@@ -142,6 +184,14 @@ class WaterService {
   getHistory() {
     return this.history;
   }
+
+  // Getters for UI consumption
+  getPotableQualityMetrics() { return this.potableQualityMetrics; }
+  getUsageRecords() { return this.usageRecords; }
+  getLeakEvents() { return this.leakEvents; }
+  getSensorHealth() { return this.sensorHealth; }
+  getIrrigationZones() { return this.irrigationZones; }
+  getIrrigationEvents() { return this.irrigationEvents; }
 }
 
 const waterService = new WaterService();
