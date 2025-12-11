@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import sofieCore from "../core/SofieCore";
 import { QuantumSection, QuantumCard, QuantumGlassGrid } from "../theme/QuantumGlassTheme";
+import { useHerbalData } from "../hooks/useApi";
 
 const HerbalLibrary = () => {
   const [herbalService, setHerbalService] = useState(null);
@@ -10,19 +11,34 @@ const HerbalLibrary = () => {
   const [selectedHerb, setSelectedHerb] = useState(null);
   const [stats, setStats] = useState({ totalHerbs: 0, traditions: 0, pregnancySafeCount: 0, resilienceFocus: 0 });
 
-  useEffect(() => {
-    const service = sofieCore.getService("herbalLibrary");
-    if (service) {
-      setHerbalService(service);
-      setHerbs(service.getHerbs(filters));
-      setStats(service.getStats());
-    }
-  }, []);
+  // API hook
+  const { data: herbalData, loading: herbalLoading, error: herbalError, refetch: refetchHerbal } = useHerbalData();
 
   useEffect(() => {
-    if (!herbalService) return;
+    if (herbalData) {
+      // Use API data when available
+      setHerbs(herbalData.remedies || []);
+      setStats({
+        totalHerbs: herbalData.totalRemedies || 0,
+        traditions: herbalData.totalSpecies || 0,
+        pregnancySafeCount: herbalData.pregnancySafe || 0,
+        resilienceFocus: herbalData.practitioners || 0
+      });
+    } else {
+      // Fallback to sofieCore
+      const service = sofieCore.getService("herbalLibrary");
+      if (service) {
+        setHerbalService(service);
+        setHerbs(service.getHerbs(filters));
+        setStats(service.getStats());
+      }
+    }
+  }, [herbalData]);
+
+  useEffect(() => {
+    if (!herbalService || herbalData) return;
     setHerbs(herbalService.getHerbs(filters));
-  }, [filters, herbalService]);
+  }, [filters, herbalService, herbalData]);
 
   const traditions = useMemo(() => herbalService?.getTraditions() || [], [herbalService]);
   const communityUses = useMemo(() => herbalService?.getCommunityUses() || [], [herbalService]);
@@ -35,6 +51,39 @@ const HerbalLibrary = () => {
     if (!herbalService) return;
     setSelectedHerb(herbalService.getHerbById(herbId));
   };
+
+  // Loading state
+  if (herbalLoading && !herbalService) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-emerald-950 via-gray-900 to-green-950">
+        <div className="text-center space-y-4">
+          <div className="text-3xl quantum-pulse text-emerald-400">
+            Loading Herbal Library...
+          </div>
+          <div className="text-emerald-300/70">
+            Gathering traditional remedies and plant knowledge
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (herbalError && !herbalService) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-emerald-950 via-gray-900 to-green-950 space-y-6">
+        <div className="text-3xl text-red-400">
+          {herbalError}
+        </div>
+        <button
+          onClick={refetchHerbal}
+          className="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-emerald-500/50"
+        >
+          Retry Loading Library
+        </button>
+      </div>
+    );
+  }
 
   const herbGrid = (
     <QuantumGlassGrid columns={3} gap={6}>

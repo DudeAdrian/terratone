@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import sofieCore from "../core/SofieCore";
 import { GlassCard, GlassButton, GlassSection, GlassContainer, GlassGrid } from "../theme/GlassmorphismTheme";
+import { useSeedBankData } from "../hooks/useApi";
 
 const SeedBank = () => {
   const [seedService, setSeedService] = useState(null);
@@ -11,22 +12,39 @@ const SeedBank = () => {
   const [activeTab, setActiveTab] = useState("inventory");
   const [categories, setCategories] = useState([]);
 
+  // API hook
+  const { data: seedData, loading: seedLoading, error: seedError, refetch: refetchSeeds } = useSeedBankData();
+
   useEffect(() => {
-    const service = sofieCore.getService("seedBank");
-    setSeedService(service);
-    
-    if (service) {
-      if (service.getInventory) {
-        setInventory(service.getInventory());
-      }
-      if (service.getCategories) {
-        const cats = service.getCategories();
-        setCategories(Array.isArray(cats) ? cats : Object.keys(cats || {}));
-      } else {
-        setCategories(["vegetables", "herbs", "microgreens", "fruits", "legumes"]);
+    if (seedData) {
+      // Use API data when available
+      const varieties = seedData.varieties || seedData.seedBank?.varieties || [];
+      const invByCategory = varieties.reduce((acc, variety) => {
+        const cat = variety.category || 'vegetables';
+        if (!acc[cat]) acc[cat] = [];
+        acc[cat].push(variety);
+        return acc;
+      }, {});
+      setInventory(invByCategory);
+      setCategories(Object.keys(invByCategory).length > 0 ? Object.keys(invByCategory) : ["vegetables", "herbs", "microgreens", "fruits", "legumes"]);
+    } else {
+      // Fallback to sofieCore
+      const service = sofieCore.getService("seedBank");
+      setSeedService(service);
+      
+      if (service) {
+        if (service.getInventory) {
+          setInventory(service.getInventory());
+        }
+        if (service.getCategories) {
+          const cats = service.getCategories();
+          setCategories(Array.isArray(cats) ? cats : Object.keys(cats || {}));
+        } else {
+          setCategories(["vegetables", "herbs", "microgreens", "fruits", "legumes"]);
+        }
       }
     }
-  }, []);
+  }, [seedData]);
 
   const currentInventory = inventory[selectedCategory] || [];
   const totalSeeds = Object.values(inventory).reduce((sum, cat) => sum + (Array.isArray(cat) ? cat.length : 0), 0);
@@ -38,10 +56,35 @@ const SeedBank = () => {
     return "bg-red-500/30 dark:bg-red-700/40 border-red-500/50 dark:border-red-600/50 text-red-800 dark:text-red-300";
   };
 
-  if (!seedService) {
+  // Loading state
+  if (seedLoading && !seedService) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-yellow-50 dark:from-gray-950 dark:via-gray-900 dark:to-green-950">
-        <p className="text-gray-600 dark:text-gray-400 text-lg">Loading seed bank...</p>
+        <div className="text-center space-y-4">
+          <div className="text-3xl quantum-pulse text-green-600 dark:text-green-400">
+            Loading Seed Bank...
+          </div>
+          <div className="text-gray-600 dark:text-gray-300">
+            Retrieving seed varieties and inventory data
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (seedError && !seedService) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-green-50 via-white to-yellow-50 dark:from-gray-950 dark:via-gray-900 dark:to-green-950 space-y-6">
+        <div className="text-3xl text-red-500 dark:text-red-400">
+          {seedError}
+        </div>
+        <button
+          onClick={refetchSeeds}
+          className="px-8 py-4 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-green-500/50"
+        >
+          Retry Loading Seed Bank
+        </button>
       </div>
     );
   }

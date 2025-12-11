@@ -1,4 +1,4 @@
-// src/pages/Inventory_v2.js - Glassmorphic Community Inventory
+// src/pages/Inventory.js - Glassmorphic Community Inventory
 
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -6,6 +6,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import sofieCore from "../core/SofieCore";
 import { QuantumSection, QuantumCard, QuantumGlassGrid } from "../theme/QuantumGlassTheme";
 import { createBackHandler } from "../utils/navigation";
+import { useInventoryData } from "../hooks/useApi";
 
 const Inventory = () => {
   const navigate = useNavigate();
@@ -17,12 +18,27 @@ const Inventory = () => {
   const [newItem, setNewItem] = useState("");
   const [newQuantity, setNewQuantity] = useState("");
 
+  // API hook
+  const { data: inventoryData, loading: inventoryLoading, error: inventoryError, refetch: refetchInventory } = useInventoryData(null, selectedCategory);
+
   useEffect(() => {
-    const inventoryService = sofieCore.getService("inventory");
-    if (inventoryService) {
-      setInventory(inventoryService.getInventory());
+    if (inventoryData) {
+      // Use API data when available
+      const itemsByCategory = (inventoryData.items?.items || inventoryData.items || []).reduce((acc, item) => {
+        const cat = item.category || 'food';
+        if (!acc[cat]) acc[cat] = [];
+        acc[cat].push(item);
+        return acc;
+      }, {});
+      setInventory(itemsByCategory);
+    } else {
+      // Fallback to sofieCore
+      const inventoryService = sofieCore.getService("inventory");
+      if (inventoryService) {
+        setInventory(inventoryService.getInventory());
+      }
     }
-  }, []);
+  }, [inventoryData]);
 
   const handleAddItem = () => {
     const inventoryService = sofieCore.getService("inventory");
@@ -34,7 +50,40 @@ const Inventory = () => {
     }
   };
 
-  const categories = Object.keys(inventory);
+  const categories = Object.keys(inventory).length > 0 ? Object.keys(inventory) : ["food", "tools", "materials", "equipment"];
+
+  // Loading state
+  if (inventoryLoading && Object.keys(inventory).length === 0) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-emerald-950 via-gray-950 to-teal-950">
+        <div className="text-center space-y-4">
+          <div className="text-3xl quantum-pulse text-emerald-400">
+            Loading Inventory...
+          </div>
+          <div className="text-emerald-300/70">
+            Fetching inventory items and categories
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (inventoryError && Object.keys(inventory).length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-emerald-950 via-gray-950 to-teal-950 space-y-6">
+        <div className="text-3xl text-red-400">
+          {inventoryError}
+        </div>
+        <button
+          onClick={refetchInventory}
+          className="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-emerald-500/50"
+        >
+          Retry Loading Inventory
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-gray-950 to-teal-950 text-white p-4 md:p-8">

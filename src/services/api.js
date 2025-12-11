@@ -577,6 +577,58 @@ class ApiService {
       body: JSON.stringify({ resolution })
     });
   }
+
+  // ============ MARKETPLACE & TRADING ============
+
+  async getMarketplaceListings(regionId = null) {
+    const query = regionId ? `?regionId=${regionId}` : '';
+    return this.request(`/api/marketplace/listings${query}`);
+  }
+
+  async getMarketplaceListing(listingId) {
+    return this.request(`/api/marketplace/listings/${listingId}`);
+  }
+
+  async createMarketplaceListing(listingData) {
+    return this.request('/api/marketplace/listings', {
+      method: 'POST',
+      body: JSON.stringify(listingData)
+    });
+  }
+
+  async getTradeHistory(regionId = null, limit = 50) {
+    const query = regionId ? `?regionId=${regionId}&limit=${limit}` : `?limit=${limit}`;
+    return this.request(`/api/marketplace/trades${query}`);
+  }
+
+  // ============ INVENTORY MANAGEMENT ============
+
+  async getInventoryItems(regionId = null, category = null) {
+    const params = new URLSearchParams();
+    if (regionId) params.append('regionId', regionId);
+    if (category) params.append('category', category);
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return this.request(`/api/inventory/items${query}`);
+  }
+
+  async getInventoryCategories(regionId = null) {
+    const query = regionId ? `?regionId=${regionId}` : '';
+    return this.request(`/api/inventory/categories${query}`);
+  }
+
+  async addInventoryItem(itemData) {
+    return this.request('/api/inventory/items', {
+      method: 'POST',
+      body: JSON.stringify(itemData)
+    });
+  }
+
+  async updateInventoryItem(itemId, updates) {
+    return this.request(`/api/inventory/items/${itemId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates)
+    });
+  }
 }
 
 // Export singleton instance

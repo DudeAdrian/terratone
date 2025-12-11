@@ -368,3 +368,165 @@ export const useAlerts = (status = 'active') => {
 
   return { alerts, loading, error, refetch, acknowledge, resolve };
 };
+
+/**
+ * Custom Hook: useHerbalData
+ * Fetches herbal library data with filtering
+ */
+export const useHerbalData = (regionId = null) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const refetch = async () => {
+    setLoading(true);
+    try {
+      const herbalData = await api.getHerbalLibrary(regionId);
+      setData(herbalData);
+      setError(null);
+    } catch (err) {
+      setError(err.message || 'Failed to load herbal library');
+      console.error('Herbal library error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refetch();
+  }, [regionId]);
+
+  return { data, loading, error, refetch };
+};
+
+/**
+ * Custom Hook: useSeedBankData
+ * Fetches seed bank inventory and varieties
+ */
+export const useSeedBankData = (regionId = null) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const refetch = async () => {
+    setLoading(true);
+    try {
+      const [seedBank, varieties] = await Promise.all([
+        api.getSeedBank(regionId),
+        api.getSeedVarieties(regionId)
+      ]);
+      setData({ seedBank, varieties });
+      setError(null);
+    } catch (err) {
+      setError(err.message || 'Failed to load seed bank');
+      console.error('Seed bank error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refetch();
+  }, [regionId]);
+
+  return { data, loading, error, refetch };
+};
+
+/**
+ * Custom Hook: useKnowledgeBaseData
+ * Fetches knowledge base articles and categories
+ */
+export const useKnowledgeBaseData = (regionId = null, category = null) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const refetch = async () => {
+    setLoading(true);
+    try {
+      const [knowledgeBase, articles] = await Promise.all([
+        api.getKnowledgeBase(regionId),
+        api.getKnowledgeArticles(category)
+      ]);
+      setData({ knowledgeBase, articles });
+      setError(null);
+    } catch (err) {
+      setError(err.message || 'Failed to load knowledge base');
+      console.error('Knowledge base error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refetch();
+  }, [regionId, category]);
+
+  return { data, loading, error, refetch };
+};
+
+/**
+ * Custom Hook: useMarketplaceData
+ * Fetches marketplace listings and trade history
+ */
+export const useMarketplaceData = (regionId = null) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const refetch = async () => {
+    setLoading(true);
+    try {
+      const [listings, trades] = await Promise.all([
+        api.getMarketplaceListings(regionId),
+        api.getTradeHistory(regionId, 50)
+      ]);
+      setData({ listings, trades });
+      setError(null);
+    } catch (err) {
+      setError(err.message || 'Failed to load marketplace');
+      console.error('Marketplace error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refetch();
+  }, [regionId]);
+
+  return { data, loading, error, refetch };
+};
+
+/**
+ * Custom Hook: useInventoryData
+ * Fetches inventory items and categories
+ */
+export const useInventoryData = (regionId = null, category = null) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const refetch = async () => {
+    setLoading(true);
+    try {
+      const [items, categories] = await Promise.all([
+        api.getInventoryItems(regionId, category),
+        api.getInventoryCategories(regionId)
+      ]);
+      setData({ items, categories });
+      setError(null);
+    } catch (err) {
+      setError(err.message || 'Failed to load inventory');
+      console.error('Inventory error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refetch();
+  }, [regionId, category]);
+
+  return { data, loading, error, refetch };
+};

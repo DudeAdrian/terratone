@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react";
 import sofieCore from "../core/SofieCore";
 import { GlassSection, GlassCard, GlassGrid } from "../theme/GlassmorphismTheme";
-import { useCommunityData } from "../hooks/useApi";
+import { useCommunityData, useMarketplaceData } from "../hooks/useApi";
 
 const Marketplace = () => {
   const [listings, setListings] = useState([]);
   const [stats, setStats] = useState({});
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [activeTab, setActiveTab] = useState("listings");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const communityData = useCommunityData("default");
+  
+  // API hook for marketplace
+  const { data: marketData, loading: marketLoading, error: marketError, refetch: refetchMarket } = useMarketplaceData();
 
   const mockStats = {
     totalListings: 127,
@@ -26,16 +27,27 @@ const Marketplace = () => {
   ];
 
   useEffect(() => {
-    const marketplaceService = sofieCore.getService("marketplace");
-    if (marketplaceService) {
-      setListings(marketplaceService.getListings?.() || mockListings);
-      setStats(marketplaceService.getStats?.() || mockStats);
+    if (marketData) {
+      // Use API data when available
+      setListings(marketData.listings?.listings || marketData.listings || []);
+      setStats({
+        totalListings: marketData.listings?.total || marketData.listings?.length || 0,
+        activeListings: marketData.listings?.active || 0,
+        totalTransactions: marketData.trades?.total || 0,
+        totalItemsTraded: marketData.trades?.totalItems || 0
+      });
     } else {
-      setListings(mockListings);
-      setStats(mockStats);
+      // Fallback to sofieCore
+      const marketplaceService = sofieCore.getService("marketplace");
+      if (marketplaceService) {
+        setListings(marketplaceService.getListings?.() || mockListings);
+        setStats(marketplaceService.getStats?.() || mockStats);
+      } else {
+        setListings(mockListings);
+        setStats(mockStats);
+      }
     }
-    setLoading(false);
-  }, []);
+  }, [marketData]);
 
   useEffect(() => {
     try {
@@ -133,7 +145,40 @@ const Marketplace = () => {
     }
   };
 
-  if (loading) {
+  // Loading state
+  if (marketLoading && listings.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 dark:from-gray-950 dark:via-gray-900 dark:to-teal-950 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="text-3xl quantum-pulse text-teal-600 dark:text-teal-400">
+            Loading Marketplace...
+          </div>
+          <div className="text-gray-600 dark:text-gray-300">
+            Fetching listings and trade data
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (marketError && listings.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 dark:from-gray-950 dark:via-gray-900 dark:to-teal-950 space-y-6">
+        <div className="text-3xl text-red-500 dark:text-red-400">
+          {marketError}
+        </div>
+        <button
+          onClick={refetchMarket}
+          className="px-8 py-4 bg-teal-500 hover:bg-teal-600 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-teal-500/50"
+        >
+          Retry Loading Marketplace
+        </button>
+      </div>
+    );
+  }
+
+  if (communityData.isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 dark:from-gray-950 dark:via-gray-900 dark:to-teal-950 flex items-center justify-center">
         <GlassCard colors={{ primary: "teal", secondary: "cyan" }}>

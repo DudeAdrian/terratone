@@ -1,8 +1,9 @@
-// src/pages/KnowledgeBase_v2.js - Glassmorphic Knowledge Base
+// src/pages/KnowledgeBase.js - Glassmorphic Knowledge Base
 
 import React, { useState, useEffect } from "react";
 import sofieCore from "../core/SofieCore";
 import { GlassSection, GlassCard, GlassGrid } from "../theme/GlassmorphismTheme";
+import { useKnowledgeBaseData } from "../hooks/useApi";
 
 const KnowledgeBase = () => {
   const [articles, setArticles] = useState([]);
@@ -11,19 +12,35 @@ const KnowledgeBase = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // API hook
+  const { data: kbData, loading: kbLoading, error: kbError, refetch: refetchKB } = useKnowledgeBaseData(null, selectedCategory !== 'all' ? selectedCategory : null);
+
   useEffect(() => {
-    const kbService = sofieCore.getService("knowledgeBase");
-    if (kbService) {
-      setArticles(kbService.getArticles());
-      setBestPractices(kbService.getBestPractices());
-      setStats(kbService.getStats());
+    if (kbData) {
+      // Use API data when available
+      setArticles(kbData.articles || kbData.knowledgeBase?.articles || []);
+      setBestPractices(kbData.knowledgeBase?.bestPractices || []);
+      setStats({
+        totalArticles: kbData.knowledgeBase?.totalArticles || kbData.articles?.length || 0,
+        totalBestPractices: kbData.knowledgeBase?.bestPractices?.length || 0,
+        categories: kbData.knowledgeBase?.categories || [],
+        totalViews: kbData.knowledgeBase?.totalViews || 0
+      });
+    } else {
+      // Fallback to sofieCore
+      const kbService = sofieCore.getService("knowledgeBase");
+      if (kbService) {
+        setArticles(kbService.getArticles());
+        setBestPractices(kbService.getBestPractices());
+        setStats(kbService.getStats());
+      }
     }
-  }, []);
+  }, [kbData]);
 
   const filteredArticles =
     selectedCategory === "all"
-      ? articles.filter((a) => a.title.toLowerCase().includes(searchQuery.toLowerCase()))
-      : articles.filter((a) => a.category === selectedCategory && a.title.toLowerCase().includes(searchQuery.toLowerCase()));
+      ? articles.filter((a) => a.title?.toLowerCase().includes(searchQuery.toLowerCase()))
+      : articles.filter((a) => a.category === selectedCategory && a.title?.toLowerCase().includes(searchQuery.toLowerCase()));
 
   const statCards = [
     { label: "Articles", value: stats.totalArticles || 0, icon: "📖", color: "blue" },
@@ -31,6 +48,39 @@ const KnowledgeBase = () => {
     { label: "Categories", value: stats.categories?.length || 0, icon: "📂", color: "purple" },
     { label: "Total Views", value: stats.totalViews || 0, icon: "👁", color: "orange" },
   ];
+
+  // Loading state
+  if (kbLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-purple-950">
+        <div className="text-center space-y-4">
+          <div className="text-3xl quantum-pulse text-purple-600 dark:text-purple-400">
+            Loading Knowledge Base...
+          </div>
+          <div className="text-gray-600 dark:text-gray-300">
+            Fetching articles and best practices
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (kbError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-purple-950 space-y-6">
+        <div className="text-3xl text-red-500 dark:text-red-400">
+          {kbError}
+        </div>
+        <button
+          onClick={refetchKB}
+          className="px-8 py-4 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-purple-500/50"
+        >
+          Retry Loading Knowledge Base
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-purple-950 p-4 md:p-8">
