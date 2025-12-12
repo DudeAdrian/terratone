@@ -58,8 +58,15 @@ router.post('/rules', async (req, res) => {
       action,
       conditions: conditions || {},
       status: 'active',
-    createdAt: new Date().toISOString(),
-  });
+    };
+    const saved = await dbSave(AutomationRule, newRule);
+    res.status(201).json({
+      ...saved.toObject(),
+      createdAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create rule' });
+  }
 });
 
 // PUT /api/automation/rules/:ruleId - Update automation rule

@@ -149,11 +149,14 @@ router.get('/analytics', async (req, res) => {
         topErrors: [
           { code: 404, count: 120 },
           { code: 500, count: 86 },
-        { code: 429, count: 50 },
-      ],
-    },
-    timestamp: new Date().toISOString(),
-  });
+          { code: 429, count: 50 },
+        ],
+      },
+      timestamp: new Date().toISOString(),
+    });
+} catch (error) {
+  res.status(500).json({ error: 'Failed to fetch analytics' });
+}
 });
 
 module.exports = router;

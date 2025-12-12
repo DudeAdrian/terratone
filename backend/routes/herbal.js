@@ -2,10 +2,14 @@
 
 const express = require('express');
 const router = express.Router();
+const Listing = require('../models/Listing');
+const { dbFind, dbSave, useMockData } = require('../utils/dbHelper');
 
 // GET /api/herbal/library - Get herbal library
-router.get('/library', (req, res) => {
+router.get('/library', async (req, res) => {
   const { category, search } = req.query;
+  
+  try {
   
   let herbs = [
     { id: 'herb-1', name: 'Basil', category: 'culinary', medicinal: true, growthTime: 60, difficulty: 'easy' },
@@ -28,10 +32,14 @@ router.get('/library', (req, res) => {
     totalCount: herbs.length,
     timestamp: new Date().toISOString(),
   });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 // GET /api/herbal/library/:herbId - Get herb details
-router.get('/library/:herbId', (req, res) => {
+router.get('/library/:herbId', async (req, res) => {
+  try {
   res.json({
     id: req.params.herbId,
     name: 'Basil',
@@ -50,39 +58,57 @@ router.get('/library/:herbId', (req, res) => {
     uses: ['Culinary seasoning', 'Essential oils', 'Traditional medicine'],
     timestamp: new Date().toISOString(),
   });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch herb details' });
+  }
 });
 
 // GET /api/herbal/seedbank - Get seed bank inventory
-router.get('/seedbank', (req, res) => {
-  res.json({
-    seeds: [
-      { id: 'seed-1', name: 'Basil Seeds', variety: 'Sweet Basil', quantity: 500, viability: 95, storedDate: '2025-06-01' },
-      { id: 'seed-2', name: 'Tomato Seeds', variety: 'Cherry', quantity: 350, viability: 92, storedDate: '2025-07-15' },
-      { id: 'seed-3', name: 'Lettuce Seeds', variety: 'Butterhead', quantity: 800, viability: 88, storedDate: '2025-08-01' },
-    ],
-    totalVarieties: 24,
-    totalSeeds: 12450,
-    timestamp: new Date().toISOString(),
-  });
+router.get('/seedbank', async (req, res) => {
+  try {
+    const seeds = await dbFind(Listing, { category: 'seeds' }, []);
+    res.json({
+      seeds: seeds || [
+        { id: 'seed-1', name: 'Basil Seeds', variety: 'Sweet Basil', quantity: 500, viability: 95, storedDate: '2025-06-01' },
+        { id: 'seed-2', name: 'Tomato Seeds', variety: 'Cherry', quantity: 350, viability: 92, storedDate: '2025-07-15' },
+        { id: 'seed-3', name: 'Lettuce Seeds', variety: 'Butterhead', quantity: 800, viability: 88, storedDate: '2025-08-01' },
+      ],
+      totalVarieties: 24,
+      totalSeeds: 12450,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch seed bank' });
+  }
 });
 
 // POST /api/herbal/seedbank - Add seeds to bank
-router.post('/seedbank', (req, res) => {
+router.post('/seedbank', async (req, res) => {
   const { name, variety, quantity, viability } = req.body;
   
   if (!name || !variety || !quantity) {
     return res.status(400).json({ error: 'Missing required fields: name, variety, quantity' });
   }
   
-  res.status(201).json({
-    id: `seed-${Date.now()}`,
-    name,
-    variety,
-    quantity,
-    viability: viability || 100,
-    storedDate: new Date().toISOString().split('T')[0],
-    timestamp: new Date().toISOString(),
-  });
+  try {
+    const newSeed = {
+      item: name,
+      quantity,
+      price: 0,
+      category: 'seeds',
+      description: variety,
+      status: 'active',
+    };
+    const saved = await dbSave(Listing, newSeed);
+    res.status(201).json({
+      ...saved.toObject(),
+      viability: viability || 100,
+      storedDate: new Date().toISOString().split('T')[0],
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to add seeds' });
+  }
 });
 
 module.exports = router;
