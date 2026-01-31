@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .App {
   text-align: center;
 }
@@ -70,4 +71,46 @@
 
 .return-button svg {
   flex-shrink: 0;
+=======
+@font-face {
+  font-family: 'Zen Tokyo Zoo';
+  src: url('/fonts/ZenTokyoZoo-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
+body {
+  font-family: 'Montserrat', Arial, sans-serif;
+  background: #232526;
+  margin: 0;
+  padding: 0;
+}
+
+.terratone-header {
+  font-family: 'Zen Tokyo Zoo', 'Montserrat', Arial, sans-serif;
+  font-size: 2.6rem;
+  font-weight: normal;
+  text-align: center;
+  letter-spacing: 0.08em;
+  background: linear-gradient(90deg, #e0e0e0 10%, #b0f0ff 40%, #fff 60%, #b0f0ff 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  filter: drop-shadow(0 2px 12px #b0f0ff88);
+  margin-bottom: 18px;
+  margin-top: 0;
+  animation: shimmer 2.5s infinite linear;
+}
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.terratone-companion {
+  font-family: 'Montserrat', Arial, sans-serif;
+>>>>>>> aaed51ed (Add Unified Protection Prompt for Copilot and clean up TerraTone UI)
 }
