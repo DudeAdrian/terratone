@@ -1,0 +1,108 @@
+/**
+ * API Status Monitor Styles
+ */
+
+.api-status-monitor {
+  position: fixed;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-family: 'Monaco', 'Courier New', monospace;
+  color: #fff;
+  min-width: 200px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.api-status-monitor.top-right {
+  top: 16px;
+  right: 16px;
+}
+
+.api-status-monitor.top-left {
+  top: 16px;
+  left: 16px;
+}
+
+.api-status-monitor.bottom-right {
+  bottom: 16px;
+  right: 16px;
+}
+
+.api-status-monitor.bottom-left {
+  bottom: 16px;
+  left: 16px;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.status-indicator.healthy .status-dot {
+  background-color: #4ade80;
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+}
+
+.status-indicator.unhealthy .status-dot {
+  background-color: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+}
+
+.error-message {
+  margin-top: 8px;
+  padding: 8px;
+  background: rgba(239, 68, 68, 0.2);
+  border-left: 2px solid #ef4444;
+  border-radius: 4px;
+  color: #fca5a5;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.last-check {
+  margin-top: 8px;
+  color: #9ca3af;
+  font-size: 10px;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .api-status-monitor {
+    padding: 10px 12px;
+    font-size: 11px;
+    min-width: 180px;
+  }
+
+  .api-status-monitor.top-right,
+  .api-status-monitor.top-left,
+  .api-status-monitor.bottom-right,
+  .api-status-monitor.bottom-left {
+    top: 8px;
+    right: 8px;
+    bottom: auto;
+    left: auto;
+  }
+}

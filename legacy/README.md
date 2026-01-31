@@ -1,0 +1,1 @@
+This folder contains legacy, informational, or historical JavaScript files from the SOFIE Systems project. These files are not part of the active application codebase but are preserved for documentation, reference, or historical purposes. If you need to restore any file, simply move it back to the main directory.

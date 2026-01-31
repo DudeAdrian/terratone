@@ -1,0 +1,114 @@
+# S.O.F.I.E. Backend Server - Environment Configuration Template
+# Copy this file to sofie-backend/.env and fill in your values
+
+# ============================================
+# Server Configuration
+# ============================================
+NODE_ENV=development
+PORT=3001
+HOST=localhost
+
+# ============================================
+# Frontend Connection
+# ============================================
+FRONTEND_URL=http://localhost:3000
+FRONTEND_API_PATH=/api
+
+# ============================================
+# Database Configuration
+# ============================================
+# Choose one database type: postgresql or mongodb
+
+# PostgreSQL
+DATABASE_TYPE=postgresql
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=sofie_backend
+DB_USER=sofie_user
+DB_PASSWORD=your_secure_password_here
+DB_POOL_MIN=2
+DB_POOL_MAX=10
+
+# MongoDB (alternative to PostgreSQL)
+# MONGODB_URI=mongodb://localhost:27017/sofie_backend
+# MONGODB_USER=sofie_user
+# MONGODB_PASSWORD=your_secure_password_here
+
+# ============================================
+# Authentication & Security
+# ============================================
+JWT_SECRET=your_jwt_secret_key_change_this_in_production
+JWT_EXPIRY=7d
+BCRYPT_ROUNDS=10
+
+# ============================================
+# API Keys & External Services
+# ============================================
+WEATHER_API_KEY=your_weather_api_key
+WEATHER_API_URL=https://api.openweathermap.org/data/2.5
+
+# Blockchain Integration (Terracare-Ledger)
+BLOCKCHAIN_NODE_URL=http://localhost:7545
+BLOCKCHAIN_CONTRACT_ADDRESS=0x...
+BLOCKCHAIN_PRIVATE_KEY=your_private_key_here
+
+# ============================================
+# File Storage
+# ============================================
+STORAGE_TYPE=local
+STORAGE_PATH=./storage/uploads
+STORAGE_MAX_SIZE=52428800  # 50MB in bytes
+
+# S3 Alternative
+# STORAGE_TYPE=s3
+# AWS_ACCESS_KEY_ID=your_key
+# AWS_SECRET_ACCESS_KEY=your_secret
+# AWS_REGION=us-east-1
+# AWS_S3_BUCKET=sofie-storage
+
+# ============================================
+# Logging
+# ============================================
+LOG_LEVEL=debug
+LOG_FORMAT=combined
+LOG_FILE=./logs/server.log
+
+# ============================================
+# Email & Notifications
+# ============================================
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email@gmail.com
+SMTP_PASSWORD=your_app_password
+SMTP_FROM=noreply@sofie.local
+
+# ============================================
+# Region Configuration
+# ============================================
+DEFAULT_REGION=default
+TIMEZONE=UTC
+LOCALE=en-US
+
+# ============================================
+# Feature Flags
+# ============================================
+FEATURE_WATER_OPTIMIZATION=true
+FEATURE_ENERGY_FORECASTING=true
+FEATURE_CLIMATE_CONTROL=true
+FEATURE_FOOD_TRACKING=true
+FEATURE_HEARTWARE_COMMUNITY=true
+FEATURE_BLOCKCHAIN_INTEGRATION=false
+FEATURE_MAP_INTEGRATION=false
+
+# ============================================
+# Development Tools
+# ============================================
+DEBUG=sofie:*
+ENABLE_SWAGGER=true
+CORS_ORIGIN=http://localhost:3000,http://localhost:3001
+
+# ============================================
+# Testing Configuration
+# ============================================
+TEST_DATABASE_URL=postgresql://sofie_user:password@localhost:5432/sofie_test
+JEST_TIMEOUT=10000
